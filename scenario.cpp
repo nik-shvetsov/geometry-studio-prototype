@@ -8,6 +8,7 @@
 
 // qt
 #include <QTimerEvent>
+#include <QDebug>
 
 // stl
 #include <cassert>
@@ -83,17 +84,61 @@ Scenario::initializeScenario() {
   auto init_cam_dir       = GMlib::Vector<float,3>( 0.0f, 1.0f, 0.0f );
   auto init_cam_up        = GMlib::Vector<float,3>(  0.0f, 0.0f, 1.0f );
 
-  // Projection cam
-  _renderer = std::make_shared<GMlib::DefaultRenderer>();
-  _camera = std::make_shared<GMlib::Camera>();
-  _renderer->setCamera(_camera.get());
+    // Projection cam 0
+    _camera = std::make_shared<GMlib::Camera>();
+    _renderer = std::make_shared<GMlib::DefaultRenderer>();
 
-  _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
-  _camera->setCuttingPlanes( 1.0f, 8000.0f );
-  _camera->rotateGlobal( GMlib::Angle(-45), GMlib::Vector<float,3>( 1.0f, 0.0f, 0.0f ) );
-  _camera->translateGlobal( GMlib::Vector<float,3>( 0.0f, -20.0f, 20.0f ) );
-  _scene->insertCamera( _camera.get() );
-  _renderer->reshape( GMlib::Vector<int,2>(init_viewport_size, init_viewport_size) );
+    _renderer->setCamera(_camera.get());
+    _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
+    _camera->setCuttingPlanes( 1.0f, 8000.0f );
+    _camera->rotateGlobal( GMlib::Angle(-45), GMlib::Vector<float,3>( 1.0f, 0.0f, 0.0f ) );
+    _camera->translateGlobal( GMlib::Vector<float,3>( 0.0f, -20.0f, 20.0f ) );
+    _scene->insertCamera( _camera.get() );
+    _renderer->reshape( GMlib::Vector<int,2>(init_viewport_size, init_viewport_size) );
+
+
+//    // Front cam 1
+//    auto rendererFront = std::make_shared<GMlib::DefaultRenderer>();
+//    auto cameraFront = std::make_shared<GMlib::Camera>();
+
+//    rendererFront->setCamera(cameraFront.get());
+//    cameraFront->set( init_cam_pos + GMlib::Vector<float,3>( 0.0f, -50.0f, 0.0f ), init_cam_dir, init_cam_up );
+//    cameraFront->setCuttingPlanes( 1.0f, 8000.0f );
+//    _scene->insertCamera( cameraFront.get() );
+//    rendererFront->reshape( GMlib::Vector<int,2>(init_viewport_size, init_viewport_size) );
+//    _camerasVec.emplace_back(cameraFront);
+//    _rendererVec.emplace_back(rendererFront);
+
+//    // Side cam 2
+//    auto rendererSide = std::make_shared<GMlib::DefaultRenderer>();
+//    auto cameraSide = std::make_shared<GMlib::Camera>();
+
+//    rendererSide->setCamera(cameraSide.get());
+//    cameraSide->set( init_cam_pos + GMlib::Vector<float,3>( -50.0f, 0.0f, 0.0f ), GMlib::Vector<float,3>( 1.0f, 0.0f, 0.0f ), init_cam_up );
+//    cameraSide->setCuttingPlanes( 1.0f, 8000.0f );
+//    _scene->insertCamera( cameraSide.get() );
+//    rendererSide->reshape( GMlib::Vector<int,2>(init_viewport_size, init_viewport_size) );
+//    _camerasVec.emplace_back(cameraSide);
+//    _rendererVec.emplace_back(rendererSide);
+
+//    // Top cam 3
+//    auto rendererTop = std::make_shared<GMlib::DefaultRenderer>();
+//    auto cameraTop = std::make_shared<GMlib::Camera>();
+
+//    rendererTop->setCamera(cameraTop.get());
+//    cameraTop->set( init_cam_pos + GMlib::Vector<float,3>( 0.0f, 0.0f, 50.0f ), -init_cam_up, init_cam_dir );
+//    cameraTop->setCuttingPlanes( 1.0f, 8000.0f );
+//    _scene->insertCamera( cameraTop.get() );
+//    rendererTop->reshape( GMlib::Vector<int,2>(init_viewport_size, init_viewport_size) );
+//    _camerasVec.emplace_back(cameraTop);
+//    _rendererVec.emplace_back(rendererTop);
+
+
+//    //initializing
+//    _camera = _camerasVec.front();
+//    _renderer = _rendererVec.front();
+
+
 
   // Surface
   _testtorus = std::make_shared<TestTorus>();
@@ -102,6 +147,11 @@ Scenario::initializeScenario() {
   _scene->insert(_testtorus.get());
 
   _testtorus->test01();
+
+  auto plane = new GMlib::PPlane<float> (GMlib::Point<float,3>(-5,0,0), GMlib::Vector<float,3>(10,0,0), GMlib::Vector<float,3>(0,20,0));
+  plane->toggleDefaultVisualizer();
+  plane->replot(50,50,1,1);
+  _scene->insert(plane);
 
   //----------------------
 }
@@ -214,22 +264,57 @@ void Scenario::panVerticalCam(int wheel_delta)
     _camera->move(GMlib::Vector<float,2>(0.0f, wheel_delta * cameraSpeedScale(false) / _camera->getViewportW()));
 }
 
+void Scenario::switchCam(int n)
+{
+    //auto init_viewport_size = 600;
+    auto init_cam_pos       = GMlib::Point<float,3>(  0.0f, 0.0f, 0.0f );
+    auto init_cam_dir       = GMlib::Vector<float,3>( 0.0f, 1.0f, 0.0f );
+    auto init_cam_up        = GMlib::Vector<float,3>(  0.0f, 0.0f, 1.0f );
+    switch (n)
+    {
+    case 1:
+        _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
+        _camera->rotateGlobal( GMlib::Angle(-45), GMlib::Vector<float,3>( 1.0f, 0.0f, 0.0f ) );
+        _camera->translateGlobal( GMlib::Vector<float,3>( 0.0f, -20.0f, 20.0f ) );
+        qDebug() << "Projection cam";
+        break;
+    case 2:
+        _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
+        _camera->rotateGlobal( GMlib::Angle(0), GMlib::Vector<float,3>( 1.0f, 0.0f, 0.0f ) );
+        _camera->translateGlobal( GMlib::Vector<float,3>( 0.0f, -20.0f, 0.0f ) );
+        qDebug() << "Front cam";
+        break;
+    case 3:
+        _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
+        _camera->rotateGlobal( GMlib::Angle(90), GMlib::Vector<float,3>( 0.0f, 1.0f, 0.0f ) );
+        _camera->translateGlobal( GMlib::Vector<float,3>( 0.0f, -20.0f, 0.0f ) );
+        qDebug() << "Side cam";
+        break;
+    case 4:
+        _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
+        _camera->rotateGlobal( GMlib::Angle(-90), GMlib::Vector<float,3>( 1.0f, 0.0f, 0.0f ) );
+        _camera->translateGlobal( GMlib::Vector<float,3>( 0.0f, 0.0f, 20.0f ) );
+        qDebug() << "Top cam";
+        break;
+    }
+}
+
 void Scenario::lockToObject()
 {
-    auto view_name = viewNameFromParams(params);
-    auto pos       = toGMlibViewPoint(view_name, posFromParams(params));
+//    auto view_name = viewNameFromParams(params);
+//    auto pos       = toGMlibViewPoint(view_name, posFromParams(params));
 
-    auto cam     = findCamera(view_name);
-    auto sel_obj = findSceneObject(view_name,pos);
+//    auto cam     = findCamera(view_name);
+//    auto sel_obj = findSceneObject(view_name,pos);
 
-    if( sel_obj )
-      _camera->lock( sel_obj );
+//    if( sel_obj )
+//      _camera->lock( sel_obj );
 
-    else if(_camera->isLocked()) _camera->unLock();
-            else
-            {
-                _camera->lock( ( _scene->getSphereClean().getPos() - _camera->getPos() ) * _camera->getDir() );
-            }
+//    else if(_camera->isLocked()) _camera->unLock();
+//            else
+//            {
+//                _camera->lock( ( _scene->getSphereClean().getPos() - _camera->getPos() ) * _camera->getDir() );
+//            }
 }
 
 void Scenario::selectObject()

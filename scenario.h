@@ -25,6 +25,13 @@ namespace GMlib {
 #include <iostream>
 #include <memory>
 
+//struct ViewPair
+//{
+//    std::shared_ptr<GMlib::DefaultRenderer>     renderer { nullptr };
+//    std::shared_ptr<GMlib::Camera>              camera   { nullptr };
+//};
+
+
 class Scenario: public QObject {
   Q_OBJECT
 public:
@@ -53,6 +60,7 @@ public:
   void                                              panHorizontalCam(int wheel_delta);
   void                                              panVerticalCam(int wheel_delta);
   void                                              lockToObject();
+  void                                              switchCam(int n);
 
 
   void                                              selectObject();
@@ -64,8 +72,21 @@ private:
   std::shared_ptr<GMlib::Scene>                     _scene;
   int                                               _timer_id;
 
-  std::shared_ptr<GMlib::DefaultRenderer>           _renderer { nullptr };
-  std::shared_ptr<GMlib::Camera>                    _camera   { nullptr };
+  std::shared_ptr<GMlib::DefaultRenderer>           _renderer { nullptr }; //active renderer
+  std::shared_ptr<GMlib::Camera>                    _camera   { nullptr }; //active cam
+
+
+  //std::vector<std::shared_ptr<GMlib::Camera>>           _camerasVec;
+  //std::vector<std::shared_ptr<GMlib::DefaultRenderer>>  _rendererVec;
+
+
+  //std::vector<std::shared_ptr<ViewPair>>            _camrendViews {nullptr}; //IDK why it crashes when using pairs
+  //std::pair<GMlib::DefaultRenderer, GMlib::Camera> pair;
+
+
+
+  std::vector<int> i;
+
   QRect                                             _viewport { QRect(0,0,1,1) };
 
   std::shared_ptr<GMlib::PointLight>                _light;

@@ -123,9 +123,25 @@ void GuiApplication::handleGLInputEvents() {
         _scenario.replotTesttorus();
     }
 
-    if( ke and ke->key() == Qt::Key_E)
+    if( ke and ke->key() == Qt::Key_1)
     {
-        qDebug() << "Pressing E!";
+        qDebug() << "Pressing E - switch cam to Proj";
+        _scenario.switchCam(1);
+    }
+    if( ke and ke->key() == Qt::Key_2)
+    {
+        qDebug() << "Pressing E - switch cam to Front";
+        _scenario.switchCam(2);
+    }
+    if( ke and ke->key() == Qt::Key_3)
+    {
+        qDebug() << "Pressing E - switch cam to Side";
+        _scenario.switchCam(3);
+    }
+    if( ke and ke->key() == Qt::Key_4)
+    {
+        qDebug() << "Pressing E - switch cam to Top";
+        _scenario.switchCam(4);
     }
 
     if(ke and ke->key() == Qt::Key_R)
@@ -155,6 +171,9 @@ void GuiApplication::handleMouseButtonPressedEvents(QMouseEvent *m)
         _rightMousePressed = true;
         qDebug() << "Right Mouse Button Pressed";
     }
+
+
+
 }
 
 void GuiApplication::handleMouseMovementEvents(QMouseEvent *m)
@@ -189,13 +208,13 @@ void GuiApplication::handleWheelEvents(QWheelEvent *w)
     if (w->modifiers() == Qt::ShiftModifier)
     {
         _scenario.panHorizontalCam(delta);
-        qDebug() << "shift incl";
+        //qDebug() << "shift incl";
     }
 
     if (w->modifiers() == Qt::ControlModifier)
     {
         _scenario.panVerticalCam(delta);
-        qDebug() << "ctrl incl";
+        //qDebug() << "ctrl incl";
     }
 
 
