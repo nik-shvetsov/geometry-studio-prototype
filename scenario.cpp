@@ -102,6 +102,8 @@ Scenario::initializeScenario() {
   _scene->insert(_testtorus.get());
 
   _testtorus->test01();
+
+  //----------------------
 }
 
 std::unique_ptr<Scenario> Scenario::_instance {nullptr};
@@ -165,4 +167,96 @@ Scenario::toggleSimulation() { _scene->toggleRun(); }
 void
 Scenario::replotTesttorus() { _testtorus->replot(4, 4, 1, 1); }
 
+float Scenario::cameraSpeedScale(const bool &lockvar)
+{
+   if (lockvar==true)
+   {
+       _camera->lock(_testtorus.get());
+
+       return M_2PI * _camera->getLockDist();
+   }
+
+  return _scene->getSphere().getRadius();
+}
+
+void Scenario::lockObject(const bool &lockvar){
+    if (lockvar==true)
+    {
+        _camera->lock(_testtorus.get());
+    }
+}
+
+void Scenario::moveCamera(const QPoint& begin_pos, const QPoint& end_pos)
+{
+    auto pos = fromQtToGMlibViewPoint(*_camera.get(), begin_pos);
+    auto prev = fromQtToGMlibViewPoint(*_camera.get(), end_pos);
+
+    const float scale = cameraSpeedScale(false);
+    GMlib::Vector<float,2> delta ( -(pos(0) - prev(0))*scale / _camera->getViewportW(),
+                                    (pos(1) - prev(1))*scale / _camera->getViewportH()      );
+
+    //delta*=0.01;
+    _camera->move( delta );
+}
+
+void Scenario::zoomCamera(const float &zoom_val)
+{
+    _camera->zoom(zoom_val);
+}
+
+void Scenario::panHorizontalCam(int wheel_delta)
+{
+    _camera->move(GMlib::Vector<float,2> (wheel_delta * cameraSpeedScale(false) / _camera->getViewportH(), 0.0f));
+}
+
+void Scenario::panVerticalCam(int wheel_delta)
+{
+    _camera->move(GMlib::Vector<float,2>(0.0f, wheel_delta * cameraSpeedScale(false) / _camera->getViewportW()));
+}
+
+void Scenario::lockToObject()
+{
+    auto view_name = viewNameFromParams(params);
+    auto pos       = toGMlibViewPoint(view_name, posFromParams(params));
+
+    auto cam     = findCamera(view_name);
+    auto sel_obj = findSceneObject(view_name,pos);
+
+    if( sel_obj )
+      _camera->lock( sel_obj );
+
+    else if(_camera->isLocked()) _camera->unLock();
+            else
+            {
+                _camera->lock( ( _scene->getSphereClean().getPos() - _camera->getPos() ) * _camera->getDir() );
+            }
+}
+
+void Scenario::selectObject()
+{
+//    auto view_name = viewNameFromParams(params);
+//    auto pos       = toGMlibViewPoint(view_name, posFromParams(params));
+
+//    auto obj = findSceneObject(view_name,pos);
+//    if( !obj )
+//      return;
+
+//    // Preserver object selection
+//    auto selected = obj->isSelected();
+//    heDeSelectAllObjects();
+//    obj->setSelected( !selected );
+}
+
+// Makes a point for camera movement
+GMlib::Point<int, 2> Scenario::fromQtToGMlibViewPoint(const GMlib::Camera& cam, const QPoint& pos)
+{
+    int h = cam.getViewportH(); // Height of the camera’s viewport
+    // QPoint
+    int q1 {pos.x()};
+    int q2 {pos.y()};
+    // GMlib Point
+    int p1 = q1;
+    int p2 = h - q2 - 1;
+    return GMlib::Point<int, 2> {p1, p2};
+}
 

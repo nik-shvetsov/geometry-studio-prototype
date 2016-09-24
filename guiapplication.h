@@ -24,17 +24,29 @@ private:
   Window                                      _window;
   Scenario                                    _scenario;
 
+  bool                                        _leftMousePressed;
+  bool                                        _rightMousePressed;
+
+  QPoint                                      _startpos;
+  QPoint                                      _endpos;
+
   std::queue<std::shared_ptr<QInputEvent>>    _input_events;
   
 
 private slots:
-  void                                        handleGLInputEvents();
-  void                                        handleKeyPress( QKeyEvent* );
 
   virtual void                                onSceneGraphInitialized();
   virtual void                                afterOnSceneGraphInitialized();
 
   virtual void                                onSceneGraphInvalidated();
+
+  void                                        handleMouseButtonPressedEvents(QMouseEvent*);
+  void                                        handleMouseMovementEvents(QMouseEvent*);
+  void                                        handleMouseButtonReleasedEvents(QMouseEvent*);
+
+  void                                        handleGLInputEvents();
+  void                                        handleKeyPress( QKeyEvent* );
+  void                                        handleWheelEvents(QWheelEvent*);
 
 
 signals:
