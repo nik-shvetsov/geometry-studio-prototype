@@ -51,6 +51,8 @@ public:
 
   void                                              replotTesttorus();
 
+  //
+
   GMlib::Point<int, 2>                              fromQtToGMlibViewPoint(const GMlib::Camera& cam, const QPoint& pos);
 
   void                                              moveCamera(const QPoint& begin_pos, const QPoint& end_pos);
@@ -59,11 +61,11 @@ public:
   void                                              lockObject(const bool &lockvar);
   void                                              panHorizontalCam(int wheel_delta);
   void                                              panVerticalCam(int wheel_delta);
-  void                                              lockToObject();
   void                                              switchCam(int n);
 
 
   void                                              selectObject();
+  void                                              lockToObject();
 
 protected:
   void                                              timerEvent(QTimerEvent *e) override;
@@ -76,16 +78,13 @@ private:
   std::shared_ptr<GMlib::Camera>                    _camera   { nullptr }; //active cam
 
 
-  //std::vector<std::shared_ptr<GMlib::Camera>>           _camerasVec;
-  //std::vector<std::shared_ptr<GMlib::DefaultRenderer>>  _rendererVec;
+  //std::vector<std::shared_ptr<GMlib::Camera>>             _camerasVec;
+  //std::vector<std::shared_ptr<GMlib::DefaultRenderer>>    _rendererVec;
 
+  //std::vector<std::shared_ptr<ViewPair>>                  _camrendViews {nullptr}; //IDK why it crashes when using smart pointer with struct
+  //std::pair<GMlib::DefaultRenderer, GMlib::Camera>        _pair;
 
-  //std::vector<std::shared_ptr<ViewPair>>            _camrendViews {nullptr}; //IDK why it crashes when using pairs
-  //std::pair<GMlib::DefaultRenderer, GMlib::Camera> pair;
-
-
-
-  std::vector<int> i;
+  //std::vector<int> _i;
 
   QRect                                             _viewport { QRect(0,0,1,1) };
 

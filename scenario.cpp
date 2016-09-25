@@ -297,6 +297,7 @@ void Scenario::switchCam(int n)
         qDebug() << "Top cam";
         break;
     }
+    _renderer->render();
 }
 
 void Scenario::lockToObject()
@@ -336,12 +337,15 @@ void Scenario::selectObject()
 GMlib::Point<int, 2> Scenario::fromQtToGMlibViewPoint(const GMlib::Camera& cam, const QPoint& pos)
 {
     int h = cam.getViewportH(); // Height of the camera’s viewport
+
     // QPoint
-    int q1 {pos.x()};
-    int q2 {pos.y()};
+    int qPointX = pos.x();
+    int qPointY = pos.y();
+
     // GMlib Point
-    int p1 = q1;
-    int p2 = h - q2 - 1;
-    return GMlib::Point<int, 2> {p1, p2};
+    int pointX = qPointX;
+    int pointY = h - qPointY - 1;
+
+    return GMlib::Point<int, 2> {pointX, pointY};
 }
 
