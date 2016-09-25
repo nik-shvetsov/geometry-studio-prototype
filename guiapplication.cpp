@@ -92,6 +92,7 @@ GuiApplication::afterOnSceneGraphInitialized() {
 void GuiApplication::onSceneGraphInvalidated() {
 
   _scenario.deinitialize();
+
 }
 
 void GuiApplication::handleKeyPress( QKeyEvent* e ) {
@@ -164,12 +165,15 @@ void GuiApplication::handleMouseButtonPressedEvents(QMouseEvent *m)
         _endpos = {m->pos().x(),m->pos().y()};
         _leftMousePressed = true;
         qDebug() << "Left Mouse Button Pressed";
+
+        //try to find object
     }
 
     if( m->buttons() == Qt::RightButton )
     {
         _rightMousePressed = true;
         qDebug() << "Right Mouse Button Pressed";
+        _scenario.selectObject(_endpos);
     }
 
 

@@ -34,6 +34,8 @@ Scenario::~Scenario() {
 void
 Scenario::deinitialize() {
 
+  _select_renderer.reset();
+
   stopSimulation();
 
   _scene->remove(_testtorus.get());
@@ -63,6 +65,8 @@ Scenario::initialize() {
 
   // Setup and init the GMlib GMWindow
   _scene = std::make_shared<GMlib::Scene>();
+
+  _select_renderer = std::make_shared<GMlib::DefaultSelectRenderer>();
 }
 
 void
@@ -87,6 +91,8 @@ Scenario::initializeScenario() {
     // Projection cam 0
     _camera = std::make_shared<GMlib::Camera>();
     _renderer = std::make_shared<GMlib::DefaultRenderer>();
+
+    //_select_renderer = std::make_shared<GMlib::DefaultSelectRenderer>();
 
     _renderer->setCamera(_camera.get());
     _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
@@ -318,19 +324,43 @@ void Scenario::lockToObject()
 //            }
 }
 
-void Scenario::selectObject()
+void Scenario::selectObject(const QPoint& qpos)
 {
-//    auto view_name = viewNameFromParams(params);
-//    auto pos       = toGMlibViewPoint(view_name, posFromParams(params));
+    qDebug() << "test";
+    auto obj = findSceneObj(qpos);
+    qDebug() << "test2";
+    if( !obj ) return;
 
-//    auto obj = findSceneObject(view_name,pos);
-//    if( !obj )
-//      return;
+    auto selected = obj->isSelected();
+    qDebug() << "test3";
+//    //deselectAllObjects();
+    obj->setSelected( !selected );
+}
 
-//    // Preserver object selection
-//    auto selected = obj->isSelected();
-//    heDeSelectAllObjects();
-//    obj->setSelected( !selected );
+GMlib::SceneObject* Scenario::findSceneObj(const QPoint& qpos)
+{
+    GMlib::Point<int,2> pos = fromQtToGMlibViewPoint(*_camera.get(), qpos);
+    GMlib::SceneObject* selected_obj = nullptr;
+
+    const GMlib::Vector<int,2> size(_camera->getViewportW(), _camera->getViewportH());
+    //const GMlib::Vector<int,2> size(QRect(0,0,200,200).width(), QRect(0,0,200,200).height());
+
+    _select_renderer->setCamera(_camera.get());
+    _select_renderer->reshape(size);
+    _select_renderer->prepare();
+
+    _select_renderer->select(GMlib::GM_SO_TYPE_SELECTOR); //+ selector only
+    selected_obj =_select_renderer->findObject(pos(0),pos(1));
+
+//    if(!selected_obj)
+//    {
+//      _select_renderer->select( -GMlib::GM_SO_TYPE_SELECTOR );//- everything else
+//      selected_obj = _select_renderer->findObject(pos(0),pos(1));
+//    }
+
+    _select_renderer->releaseCamera();
+
+    return selected_obj;
 }
 
 // Makes a point for camera movement
@@ -346,6 +376,6 @@ GMlib::Point<int, 2> Scenario::fromQtToGMlibViewPoint(const GMlib::Camera& cam, 
     int pointX = qPointX;
     int pointY = h - qPointY - 1;
 
-    return GMlib::Point<int, 2> {pointX, pointY};
+    return GMlib::Point<int, 2> (pointX, pointY);
 }
 

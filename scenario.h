@@ -12,6 +12,8 @@ namespace GMlib {
   class PointLight;
   class DefaultRenderer;
   class RenderTarget;
+  class DefaultSelectRenderer;
+  class SceneObject;
 
   template <typename T, int n>
   class Point;
@@ -64,7 +66,8 @@ public:
   void                                              switchCam(int n);
 
 
-  void                                              selectObject();
+  void                                              selectObject(const QPoint& pos);
+  GMlib::SceneObject*                               findSceneObj(const QPoint& pos);
   void                                              lockToObject();
 
 protected:
@@ -74,6 +77,7 @@ private:
   std::shared_ptr<GMlib::Scene>                     _scene;
   int                                               _timer_id;
 
+  std::shared_ptr<GMlib::DefaultSelectRenderer>     _select_renderer;
   std::shared_ptr<GMlib::DefaultRenderer>           _renderer { nullptr }; //active renderer
   std::shared_ptr<GMlib::Camera>                    _camera   { nullptr }; //active cam
 
