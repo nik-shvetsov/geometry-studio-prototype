@@ -68,6 +68,9 @@ public:
 
   void                                              selectObject(const QPoint& pos);
   GMlib::SceneObject*                               findSceneObj(const QPoint& pos);
+
+  void                                              deselectAllObj();
+
   void                                              lockToObject();
 
 protected:

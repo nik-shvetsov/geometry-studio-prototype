@@ -326,15 +326,17 @@ void Scenario::lockToObject()
 
 void Scenario::selectObject(const QPoint& qpos)
 {
-    qDebug() << "test";
     auto obj = findSceneObj(qpos);
-    qDebug() << "test2";
     if( !obj ) return;
 
     auto selected = obj->isSelected();
-    qDebug() << "test3";
-//    //deselectAllObjects();
+    deselectAllObj();
     obj->setSelected( !selected );
+}
+
+void Scenario::deselectAllObj()
+{
+    _scene->removeSelections();
 }
 
 GMlib::SceneObject* Scenario::findSceneObj(const QPoint& qpos)
@@ -352,11 +354,11 @@ GMlib::SceneObject* Scenario::findSceneObj(const QPoint& qpos)
     _select_renderer->select(GMlib::GM_SO_TYPE_SELECTOR); //+ selector only
     selected_obj =_select_renderer->findObject(pos(0),pos(1));
 
-//    if(!selected_obj)
-//    {
-//      _select_renderer->select( -GMlib::GM_SO_TYPE_SELECTOR );//- everything else
-//      selected_obj = _select_renderer->findObject(pos(0),pos(1));
-//    }
+    if(!selected_obj)
+    {
+      _select_renderer->select( -GMlib::GM_SO_TYPE_SELECTOR );//- everything else
+      selected_obj = _select_renderer->findObject(pos(0),pos(1));
+    }
 
     _select_renderer->releaseCamera();
 

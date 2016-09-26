@@ -97,26 +97,29 @@ void GuiApplication::onSceneGraphInvalidated() {
 
 void GuiApplication::handleKeyPress( QKeyEvent* e ) {
 
-  if(e->key() == Qt::Key_Q) {
-    _window.close();
+  if(e->key() == Qt::Key_Q)
+  {
+      _window.close();
   }
 
   else
   {
       //if(e->key() == Qt::Key_P)
       //{
-        _input_events.push(std::make_shared<QKeyEvent>(*e));
+      _input_events.push(std::make_shared<QKeyEvent>(*e));
       //}
   }
 
 }
 
-void GuiApplication::handleGLInputEvents() {
+void GuiApplication::handleGLInputEvents() { //for OpenGL methods
 
   while(!_input_events.empty())
   {
     const auto& e  = _input_events.front();
     const auto& ke = std::dynamic_pointer_cast<const QKeyEvent>(e);
+
+    const auto& me = std::dynamic_pointer_cast<const QMouseEvent>(e); //for mouse events
 
     if(ke and ke->key() == Qt::Key_P)
     {
@@ -152,7 +155,14 @@ void GuiApplication::handleGLInputEvents() {
         _scenario.toggleSimulation();
     }
 
+    if (me and me->buttons() == Qt::RightButton)
+    {
+        qDebug() << "Handling RMB - select object";
+        _scenario.selectObject(_endpos);
+    }
+
     _input_events.pop();
+
   }
 
 }
@@ -161,32 +171,35 @@ void GuiApplication::handleMouseButtonPressedEvents(QMouseEvent *m)
 {
     if( m->buttons() == Qt::LeftButton )
     {
+        qDebug() << "Left Mouse Button Pressed";
+        _leftMousePressed = true;
+
         _startpos = _endpos;
         _endpos = {m->pos().x(),m->pos().y()};
-        _leftMousePressed = true;
-        qDebug() << "Left Mouse Button Pressed";
-
-        //try to find object
     }
 
     if( m->buttons() == Qt::RightButton )
     {
-        _rightMousePressed = true;
         qDebug() << "Right Mouse Button Pressed";
-        _scenario.selectObject(_endpos);
+        _rightMousePressed = true;
+
+        _endpos.setX(m->pos().x());
+        _endpos.setY(m->pos().y());
     }
 
-
+    _input_events.push(std::make_shared<QMouseEvent>(*m));
 
 }
 
 void GuiApplication::handleMouseMovementEvents(QMouseEvent *m)
 {
-    if(m->type()==QEvent::MouseMove && _leftMousePressed == true){
+    if(m->type()==QEvent::MouseMove && _leftMousePressed == true)
+    {
         _startpos = _endpos;
         _endpos = {m->pos().x(),m->pos().y()};
+
         _scenario.moveCamera(_startpos,_endpos);
-   }
+    }
 }
 
 void GuiApplication::handleMouseButtonReleasedEvents(QMouseEvent *m)
