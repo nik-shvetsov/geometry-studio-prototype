@@ -144,8 +144,6 @@ Scenario::initializeScenario() {
 //    _camera = _camerasVec.front();
 //    _renderer = _rendererVec.front();
 
-
-
   // Surface
   _testtorus = std::make_shared<TestTorus>();
   _testtorus->toggleDefaultVisualizer();
@@ -323,8 +321,8 @@ void Scenario::selectObject(const QPoint& qpos)
     auto selected_obj = findSceneObj(qpos);
     if( !selected_obj ) return;
 
-    auto selected = selected_obj->isSelected();  //bool
-    deselectAllObj();                   //for selecting only 1 object at a time
+    auto selected = selected_obj->isSelected(); //bool
+    deselectAllObj(); //for selecting only 1 object at a time
     selected_obj->setSelected( !selected );
 }
 
@@ -337,6 +335,29 @@ void Scenario::selectObjects(const QPoint& qpos)
 void Scenario::deselectAllObj()
 {
     _scene->removeSelections();
+}
+
+void Scenario::selectSubObjects(GMlib::SceneObject* object)
+{
+    GMlib::Camera *cam   = dynamic_cast<GMlib::Camera*>( object );
+    GMlib::Light  *light = dynamic_cast<GMlib::Light*>( object );
+    if( !cam && !light ) {object->setSelected(true);}
+
+    for( int i = 0; i < object->getChildren().getSize(); i++ )
+    {
+        selectSubObjects( (object->getChildren())[i] );
+    }
+}
+
+void Scenario::selectAllObjects()
+{
+    _scene->removeSelections();
+
+    GMlib::Scene *scene = _scene.get();
+    for( int i = 0; i < scene->getSize(); ++i )
+    {
+        selectSubObjects( (*scene)[i] );
+    }
 }
 
 GMlib::SceneObject* Scenario::findSceneObj(const QPoint& qpos)

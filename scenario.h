@@ -68,6 +68,10 @@ public:
 
   void                                              selectObject(const QPoint& qpos);
   void                                              selectObjects(const QPoint& qpos);
+
+  void                                              selectAllObjects();
+  void                                              selectSubObjects(GMlib::SceneObject* object);
+
   GMlib::SceneObject*                               findSceneObj(const QPoint& qpos);
 
   void                                              deselectAllObj();

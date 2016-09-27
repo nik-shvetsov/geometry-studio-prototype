@@ -54,6 +54,13 @@ GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, a
 
   _window.setSource(QUrl("qrc:///qml/main.qml"));
   _window.show();
+
+
+//button stance initializing
+  _controlPressed = false;
+  _shiftPressed = false;
+  _leftMousePressed = false;
+  _rightMousePressed = false;
 }
 
 
@@ -150,6 +157,19 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
     {
         qDebug() << "Handling the P button - replot Torus";
         _scenario.replotTesttorus();
+        //_scenario.selectAllObjects();
+    }
+
+    if(ke and ke->key() == Qt::Key_O)
+    {
+        qDebug() << "O - select all objects on scene";
+        _scenario.selectAllObjects();
+    }
+
+    if(ke and ke->key() == Qt::Key_L)
+    {
+        qDebug() << "L - deselect all objects on scene";
+        _scenario.deselectAllObj();
     }
 
     if( ke and ke->key() == Qt::Key_1)
@@ -188,7 +208,7 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
 
     if ((me and me->buttons() == Qt::RightButton) && _controlPressed)
     {
-        qDebug() << "SELECT OBJECTS";
+        qDebug() << "Handling RMB with control - multiple objects selection";
         _scenario.selectObjects(_endpos);
     }
 
@@ -239,7 +259,6 @@ void GuiApplication::handleMouseButtonReleasedEvents(QMouseEvent *m)
         _leftMousePressed = false;
         _rightMousePressed = false;
     }
-
 }
 
 void GuiApplication::handleWheelEvents(QWheelEvent *w)
