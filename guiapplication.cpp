@@ -110,6 +110,16 @@ void GuiApplication::handleKeyPress( QKeyEvent* e ) {
         _window.close();
     }
 
+    else if(e->key() == Qt::Key_S)
+    {
+        _scenario.save();
+    }
+
+    else if(e->key() == Qt::Key_D)
+    {
+        _scenario.load();
+    }
+
     else if(e->modifiers() == Qt::ShiftModifier)
     {
         _shiftPressed = true;
@@ -157,7 +167,6 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
     {
         qDebug() << "Handling the P button - replot Torus";
         _scenario.replotTesttorus();
-        //_scenario.selectAllObjects();
     }
 
     if(ke and ke->key() == Qt::Key_O)
@@ -283,8 +292,6 @@ void GuiApplication::handleWheelEvents(QWheelEvent *w)
         _scenario.panVerticalCam(delta);
         //qDebug() << "ctrl incl";
     }
-
-
 }
 
 

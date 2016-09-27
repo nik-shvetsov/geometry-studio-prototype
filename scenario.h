@@ -17,6 +17,9 @@ namespace GMlib {
 
   template <typename T, int n>
   class Point;
+
+  template <typename T>
+  class PTorus;
 }
 
 // qt
@@ -53,7 +56,8 @@ public:
 
   void                                              replotTesttorus();
 
-  //
+  void                                              save();
+  void                                              load();
 
   GMlib::Point<int, 2>                              fromQtToGMlibViewPoint(const GMlib::Camera& cam, const QPoint& pos);
 
@@ -102,6 +106,11 @@ private:
 
   std::shared_ptr<GMlib::PointLight>                _light;
   std::shared_ptr<TestTorus>                        _testtorus;
+
+private:
+  void                                              save( std::ofstream& os, const GMlib::SceneObject* obj);
+  void                                              saveSO( std::ofstream& os, const GMlib::SceneObject* obj);
+  void                                              savePT( std::ofstream& os, const GMlib::PTorus<float>* obj);
 
 private:
   static std::unique_ptr<Scenario>                  _instance;

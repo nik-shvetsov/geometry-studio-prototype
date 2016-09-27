@@ -1,6 +1,11 @@
 #include "scenario.h"
 #include "testtorus.h"
 
+#include "gmlibsceneloader/gmlibsceneloaderdatadescription.h"
+
+// openddl
+#include "openddl/openddl.h"
+
 // gmlib
 #include <gmOpenglModule>
 #include <gmSceneModule>
@@ -12,6 +17,8 @@
 
 // stl
 #include <cassert>
+#include <iostream>
+#include <iomanip>
 
 Scenario::Scenario() : QObject(), _timer_id{0}/*, _select_renderer{nullptr}*/ {
 
@@ -400,5 +407,120 @@ GMlib::Point<int, 2> Scenario::fromQtToGMlibViewPoint(const GMlib::Camera& cam, 
     int pointY = h - qPointY - 1;
 
     return GMlib::Point<int, 2> (pointX, pointY);
+}
+
+void Scenario::save()
+{
+    qDebug() << "Saving scene...";
+    stopSimulation();
+    {
+        auto filename = std::string("gmlib_save.openddl");
+        auto os = std::ofstream(filename, std::ios_base::out);
+
+        if(!os.is_open())
+        {
+            std::cerr << "Unable to open " << filename << " for saving..." << std::endl;
+            return;
+        }
+
+        os << "GMlibVersion { int { 0x" << std::setw(6) << std::setfill('0') << std::hex << GM_VERSION << " } }" << std::endl;
+
+        auto &scene = *_scene;
+        for( auto i = 0; i < scene.getSize(); ++i )
+        {
+            const auto obj = scene[i];
+            save(os,obj);
+        }
+    }
+    startSimulation();
+}
+
+void Scenario::load()
+{
+    qDebug() << "Open scene...";
+    stopSimulation();
+    {
+        auto filename = std::string("gmlib_save.openddl");
+        auto is = std::ifstream(filename,std::ios_base::in);
+
+        if(!is.is_open())
+        {
+            std::cerr << "Unable to open " << filename << " for reading..."  << std::endl;
+            return;
+        }
+
+        is.seekg( 0, std::ios_base::end );
+        auto buff_length = is.tellg();
+        is.seekg( 0, std::ios_base::beg );
+
+        std::vector<char> buffer(buff_length);
+        is.read(buffer.data(),buff_length);
+
+        std::cout << "Buffer length: " << buff_length << std::endl;
+
+        GMlibSceneLoaderDataDescription gsdd;
+
+        ODDL::DataResult result = gsdd.ProcessText(buffer.data());
+
+        if(result != ODDL::kDataOkay)
+        {
+            std::cerr << "Data result no A-OK" << std::endl;
+            return;
+        }
+
+        std::cout << "Data result A-OK" << std::endl;
+        auto structure = gsdd.GetRootStructure()->GetFirstSubnode();
+        while(structure)
+        {
+
+
+            // Do something ^^,
+            // Travers the ODDL structures and build your scene objects
+
+
+
+
+            structure = structure->Next();
+        }
+
+
+        // Load GMlib::SceneObjects into the scene.
+
+
+    }
+    startSimulation();
+}
+
+void Scenario::save(std::ofstream &os, const GMlib::SceneObject *obj)
+{
+    auto cam_obj = dynamic_cast<const GMlib::Camera*>(obj);
+    if(cam_obj) return;
+
+    os << obj->getIdentity() << std::endl << "{" << std::endl;
+    saveSO(os,obj);
+    auto ptorus_obj = dynamic_cast<const GMlib::PTorus<float>*>(obj);
+
+    if(ptorus_obj) {savePT(os,ptorus_obj);}
+
+    const auto& children = obj->getChildren();
+
+    for(auto i = 0; i < children.getSize(); ++i)
+    {
+        save(os,children(i));
+    }
+    os << "}" << std::endl;
+}
+
+void Scenario::saveSO(std::ofstream &os, const GMlib::SceneObject *obj)
+{
+    os << "SceneObjectData" << std::endl << "{" << std::endl;
+    os << "setCollapsed( bool {" << "  " << ( obj->isCollapsed()?"true":"false") << "} )";
+    os << "}" << std::endl;
+}
+
+void Scenario::savePT(std::ofstream &os, const GMlib::PTorus<float> *obj)
+{
+    os << "PTorusData" << std::endl << "{" << std::endl;
+    os << "}" << std::endl;
 }
 
