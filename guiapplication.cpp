@@ -115,7 +115,7 @@ void GuiApplication::handleKeyPress( QKeyEvent* e ) {
         _scenario.save();
     }
 
-    else if(e->key() == Qt::Key_D)
+    else if(e->key() == Qt::Key_O)
     {
         _scenario.load();
     }
@@ -169,16 +169,10 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
         _scenario.replotTesttorus();
     }
 
-    if(ke and ke->key() == Qt::Key_O)
+    if(ke and ke->key() == Qt::Key_A)
     {
-        qDebug() << "O - select all objects on scene";
-        _scenario.selectAllObjects();
-    }
-
-    if(ke and ke->key() == Qt::Key_L)
-    {
-        qDebug() << "L - deselect all objects on scene";
-        _scenario.deselectAllObj();
+        qDebug() << "A - select or deselect all objects";
+        _scenario.toogleSelectionAllObjects();
     }
 
     if( ke and ke->key() == Qt::Key_1)

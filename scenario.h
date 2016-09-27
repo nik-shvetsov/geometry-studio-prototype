@@ -69,18 +69,19 @@ public:
   void                                              panVerticalCam(int wheel_delta);
   void                                              switchCam(int n);
 
+  void                                              lockToObject(const QPoint& qpos);
+
+
+  GMlib::SceneObject*                               findSceneObj(const QPoint& qpos);
 
   void                                              selectObject(const QPoint& qpos);
   void                                              selectObjects(const QPoint& qpos);
 
-  void                                              selectAllObjects();
   void                                              selectSubObjects(GMlib::SceneObject* object);
+  void                                              selectAllObjects();
 
-  GMlib::SceneObject*                               findSceneObj(const QPoint& qpos);
-
-  void                                              deselectAllObj();
-
-  void                                              lockToObject(const QPoint& qpos);
+  void                                              toogleSelectionAllObjects();
+  void                                              deselectAllObjects();
 
 protected:
   void                                              timerEvent(QTimerEvent *e) override;

@@ -329,7 +329,7 @@ void Scenario::selectObject(const QPoint& qpos)
     if( !selected_obj ) return;
 
     auto selected = selected_obj->isSelected(); //bool
-    deselectAllObj(); //for selecting only 1 object at a time
+    deselectAllObjects(); //for selecting only 1 object at a time
     selected_obj->setSelected( !selected );
 }
 
@@ -339,7 +339,7 @@ void Scenario::selectObjects(const QPoint& qpos)
     if( obj ) obj->toggleSelected();
 }
 
-void Scenario::deselectAllObj()
+void Scenario::deselectAllObjects()
 {
     _scene->removeSelections();
 }
@@ -358,12 +358,24 @@ void Scenario::selectSubObjects(GMlib::SceneObject* object)
 
 void Scenario::selectAllObjects()
 {
-    _scene->removeSelections();
+    deselectAllObjects();
 
     GMlib::Scene *scene = _scene.get();
     for( int i = 0; i < scene->getSize(); ++i )
     {
         selectSubObjects( (*scene)[i] );
+    }
+}
+
+void Scenario::toogleSelectionAllObjects()
+{
+    if( _scene->getSelectedObjects().getSize() > 0 )
+    {
+        deselectAllObjects();
+    }
+    else
+    {
+        selectAllObjects();
     }
 }
 
