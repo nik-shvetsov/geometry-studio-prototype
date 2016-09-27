@@ -58,20 +58,21 @@ public:
   GMlib::Point<int, 2>                              fromQtToGMlibViewPoint(const GMlib::Camera& cam, const QPoint& pos);
 
   void                                              moveCamera(const QPoint& begin_pos, const QPoint& end_pos);
-  float                                             cameraSpeedScale(const bool &lockvar);
+  float                                             cameraSpeedScale();
   void                                              zoomCamera(const float &zoom_val);
-  void                                              lockObject(const bool &lockvar);
+  //void                                              lockObject(const bool &lockvar);
   void                                              panHorizontalCam(int wheel_delta);
   void                                              panVerticalCam(int wheel_delta);
   void                                              switchCam(int n);
 
 
-  void                                              selectObject(const QPoint& pos);
-  GMlib::SceneObject*                               findSceneObj(const QPoint& pos);
+  void                                              selectObject(const QPoint& qpos);
+  void                                              selectObjects(const QPoint& qpos);
+  GMlib::SceneObject*                               findSceneObj(const QPoint& qpos);
 
   void                                              deselectAllObj();
 
-  void                                              lockToObject();
+  void                                              lockToObject(const QPoint& qpos);
 
 protected:
   void                                              timerEvent(QTimerEvent *e) override;

@@ -223,31 +223,31 @@ Scenario::toggleSimulation() { _scene->toggleRun(); }
 void
 Scenario::replotTesttorus() { _testtorus->replot(4, 4, 1, 1); }
 
-float Scenario::cameraSpeedScale(const bool &lockvar)
+float Scenario::cameraSpeedScale()
 {
-   if (lockvar==true)
-   {
-       _camera->lock(_testtorus.get());
+    if( !_camera )
+      return 1.0f;
 
-       return M_2PI * _camera->getLockDist();
-   }
+    if(_camera->isLocked())
+      return M_2PI * _camera->getLockDist();
 
-  return _scene->getSphere().getRadius();
+    return _scene->getSphere().getRadius();
 }
 
-void Scenario::lockObject(const bool &lockvar){
-    if (lockvar==true)
-    {
-        _camera->lock(_testtorus.get());
-    }
-}
+//void Scenario::lockObject(const bool &lockvar)
+//{
+//    if (lockvar==true)
+//    {
+//        _camera->lock(_testtorus.get());
+//    }
+//}
 
 void Scenario::moveCamera(const QPoint& begin_pos, const QPoint& end_pos)
 {
     auto pos = fromQtToGMlibViewPoint(*_camera.get(), begin_pos);
     auto prev = fromQtToGMlibViewPoint(*_camera.get(), end_pos);
 
-    const float scale = cameraSpeedScale(false);
+    const float scale = cameraSpeedScale();
     GMlib::Vector<float,2> delta ( -(pos(0) - prev(0))*scale / _camera->getViewportW(),
                                     (pos(1) - prev(1))*scale / _camera->getViewportH()      );
 
@@ -262,12 +262,12 @@ void Scenario::zoomCamera(const float &zoom_val)
 
 void Scenario::panHorizontalCam(int wheel_delta)
 {
-    _camera->move(GMlib::Vector<float,2> (wheel_delta * cameraSpeedScale(false) / _camera->getViewportH(), 0.0f));
+    _camera->move(GMlib::Vector<float,2> (wheel_delta * cameraSpeedScale() / _camera->getViewportH(), 0.0f));
 }
 
 void Scenario::panVerticalCam(int wheel_delta)
 {
-    _camera->move(GMlib::Vector<float,2>(0.0f, wheel_delta * cameraSpeedScale(false) / _camera->getViewportW()));
+    _camera->move(GMlib::Vector<float,2>(0.0f, wheel_delta * cameraSpeedScale() / _camera->getViewportW()));
 }
 
 void Scenario::switchCam(int n)
@@ -306,32 +306,32 @@ void Scenario::switchCam(int n)
     _renderer->render();
 }
 
-void Scenario::lockToObject()
+void Scenario::lockToObject(const QPoint& qpos)
 {
-//    auto view_name = viewNameFromParams(params);
-//    auto pos       = toGMlibViewPoint(view_name, posFromParams(params));
+    auto selected_obj = findSceneObj(qpos);
+    if( selected_obj ) {_camera->lock( selected_obj );}
+    else if(_camera->isLocked()) {_camera->unLock();}
 
-//    auto cam     = findCamera(view_name);
-//    auto sel_obj = findSceneObject(view_name,pos);
-
-//    if( sel_obj )
-//      _camera->lock( sel_obj );
-
-//    else if(_camera->isLocked()) _camera->unLock();
-//            else
-//            {
-//                _camera->lock( ( _scene->getSphereClean().getPos() - _camera->getPos() ) * _camera->getDir() );
-//            }
+    else
+    {
+        _camera->lock( ( _scene->getSphereClean().getPos() - _camera->getPos() ) * _camera->getDir() );
+    }
 }
 
 void Scenario::selectObject(const QPoint& qpos)
 {
-    auto obj = findSceneObj(qpos);
-    if( !obj ) return;
+    auto selected_obj = findSceneObj(qpos);
+    if( !selected_obj ) return;
 
-    auto selected = obj->isSelected();
-    deselectAllObj();
-    obj->setSelected( !selected );
+    auto selected = selected_obj->isSelected();  //bool
+    deselectAllObj();                   //for selecting only 1 object at a time
+    selected_obj->setSelected( !selected );
+}
+
+void Scenario::selectObjects(const QPoint& qpos)
+{
+    auto obj = findSceneObj(qpos);
+    if( obj ) obj->toggleSelected();
 }
 
 void Scenario::deselectAllObj()

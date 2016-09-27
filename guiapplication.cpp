@@ -28,10 +28,11 @@ GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, a
   connect( this, &QGuiApplication::lastWindowClosed,
            this, &QGuiApplication::quit );
 
-
   connect( &_window, &Window::signKeyPressed,
            this,     &GuiApplication::handleKeyPress );
 
+  connect( &_window, &Window::signKeyReleased,
+           this,     &GuiApplication::handleKeyRelease );
 
   connect( &_window, &Window::beforeRendering,
            this,     &GuiApplication::handleGLInputEvents,
@@ -97,19 +98,43 @@ void GuiApplication::onSceneGraphInvalidated() {
 
 void GuiApplication::handleKeyPress( QKeyEvent* e ) {
 
-  if(e->key() == Qt::Key_Q)
-  {
-      _window.close();
-  }
+    if(e->key() == Qt::Key_Q)
+    {
+        _window.close();
+    }
 
-  else
-  {
-      //if(e->key() == Qt::Key_P)
-      //{
-      _input_events.push(std::make_shared<QKeyEvent>(*e));
-      //}
-  }
+    else if(e->modifiers() == Qt::ShiftModifier)
+    {
+        _shiftPressed = true;
+        qDebug() << "Shift pressed";
+    }
 
+    else if(e->modifiers() == Qt::ControlModifier)
+    {
+        _controlPressed = true;
+        qDebug() << "CTRL pressed";
+    }
+
+    else
+    {
+        _input_events.push(std::make_shared<QKeyEvent>(*e));
+    }
+
+}
+
+void GuiApplication::handleKeyRelease (QKeyEvent* e)
+{
+    if (e->type()==QEvent::KeyRelease && _controlPressed == true)
+    {
+        _controlPressed = false;
+        qDebug() << "CTRL released";
+
+    }
+    if (e->type()==QEvent::KeyRelease && _shiftPressed == true)
+    {
+        _shiftPressed = false;
+        qDebug() << "Shift released";
+    }
 }
 
 void GuiApplication::handleGLInputEvents() { //for OpenGL methods
@@ -150,21 +175,26 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
 
     if(ke and ke->key() == Qt::Key_R)
     {
-        qDebug() << "Handling the R button - stop simulation";
+        qDebug() << "Handling the R button - toggle simulation";
         //_scenario.stopSimulation();
         _scenario.toggleSimulation();
     }
 
-    if (me and me->buttons() == Qt::RightButton)
+    if ( (me and me->buttons() == Qt::RightButton) && !_controlPressed)
     {
         qDebug() << "Handling RMB - select object";
         _scenario.selectObject(_endpos);
     }
 
+    if ((me and me->buttons() == Qt::RightButton) && _controlPressed)
+    {
+        qDebug() << "SELECT OBJECTS";
+        _scenario.selectObjects(_endpos);
+    }
+
     _input_events.pop();
 
   }
-
 }
 
 void GuiApplication::handleMouseButtonPressedEvents(QMouseEvent *m)
@@ -209,6 +239,7 @@ void GuiApplication::handleMouseButtonReleasedEvents(QMouseEvent *m)
         _leftMousePressed = false;
         _rightMousePressed = false;
     }
+
 }
 
 void GuiApplication::handleWheelEvents(QWheelEvent *w)
