@@ -20,6 +20,11 @@ namespace GMlib {
 
   template <typename T>
   class PTorus;
+
+  template <typename T, int n>
+  class Vector;
+
+  class Angle;
 }
 
 // qt
@@ -82,6 +87,12 @@ public:
 
   void                                              toogleSelectionAllObjects();
   void                                              deselectAllObjects();
+
+  void                                              camFly(GMlib::Vector<float,3> dS, GMlib::Angle dA, GMlib::Vector<float,3> axis);
+  void                                              camFlyUp();
+  void                                              camFlyDown();
+  void                                              camFlyRight();
+  void                                              camFlyLeft();
 
 protected:
   void                                              timerEvent(QTimerEvent *e) override;

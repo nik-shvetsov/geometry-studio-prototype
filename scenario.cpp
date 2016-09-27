@@ -311,6 +311,51 @@ void Scenario::switchCam(int n)
     _renderer->render();
 }
 
+void Scenario::camFly(GMlib::Vector<float,3> dS, GMlib::Angle dA, GMlib::Vector<float,3> axis)
+{
+    _camera->translateGlobal(dS);
+    _camera->rotateGlobal(dA, axis);
+}
+
+void Scenario::camFlyUp()
+{
+    auto dS = GMlib::Vector<float,3>(0,0,0.1);
+    auto dA = GMlib::Angle(0);
+    auto axis = GMlib::Vector<float,3>(0,0,1);
+
+    camFly(dS,dA,axis);
+}
+
+void Scenario::camFlyDown()
+{
+    auto dS = GMlib::Vector<float,3>(0,0,-0.1);
+    auto dA = GMlib::Angle(0);
+    auto axis = GMlib::Vector<float,3>(0,0,1);
+
+    camFly(dS,dA,axis);
+}
+
+void Scenario::camFlyRight()
+{
+    auto dS = GMlib::Vector<float,3>(0.1,0,0);
+    auto dA = GMlib::Angle(0);
+    auto axis = GMlib::Vector<float,3>(0,0,1);
+
+    camFly(dS,dA,axis);
+}
+
+void Scenario::camFlyLeft()
+{
+    auto dS = GMlib::Vector<float,3>(-0.1,0,0);
+    auto dA = GMlib::Angle(0);
+    auto axis = GMlib::Vector<float,3>(0,0,1);
+
+    camFly(dS,dA,axis);
+}
+
+//
+
+
 void Scenario::lockToObject(const QPoint& qpos)
 {
     auto selected_obj = findSceneObj(qpos);
@@ -535,4 +580,6 @@ void Scenario::savePT(std::ofstream &os, const GMlib::PTorus<float> *obj)
     os << "PTorusData" << std::endl << "{" << std::endl;
     os << "}" << std::endl;
 }
+
+
 

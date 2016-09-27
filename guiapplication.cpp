@@ -112,13 +112,40 @@ void GuiApplication::handleKeyPress( QKeyEvent* e ) {
 
     else if(e->key() == Qt::Key_S)
     {
-        _scenario.save();
+        qDebug() << "Saving...";
+        //_scenario.save();
+
     }
 
     else if(e->key() == Qt::Key_O)
     {
-        _scenario.load();
+        qDebug() << "Loading...";
+        //_scenario.load();
     }
+
+    //cam fly controls
+
+    else if (e->key() == Qt::Key_Up)
+    {
+        _scenario.camFlyUp();
+    }
+
+    else if (e->key() == Qt::Key_Down)
+    {
+        _scenario.camFlyDown();
+    }
+
+    else if (e->key() == Qt::Key_Right)
+    {
+        _scenario.camFlyRight();
+    }
+
+    else if (e->key() == Qt::Key_Left)
+    {
+        _scenario.camFlyLeft();
+    }
+
+    //end cam fly controls
 
     else if(e->modifiers() == Qt::ShiftModifier)
     {
