@@ -59,6 +59,7 @@ GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, a
 //button stance initializing
   _controlPressed = false;
   _shiftPressed = false;
+  _altPressed = false;
   _leftMousePressed = false;
   _rightMousePressed = false;
 }
@@ -112,15 +113,15 @@ void GuiApplication::handleKeyPress( QKeyEvent* e ) {
 
     else if(e->key() == Qt::Key_S)
     {
-        qDebug() << "Saving...";
-        //_scenario.save();
+        _scenario.save();
+        qDebug() << "File saved";
 
     }
 
     else if(e->key() == Qt::Key_O)
     {
-        qDebug() << "Loading...";
-        //_scenario.load();
+        _scenario.load();
+        qDebug() << "File loaded";
     }
 
     //cam fly controls
@@ -159,6 +160,12 @@ void GuiApplication::handleKeyPress( QKeyEvent* e ) {
         qDebug() << "CTRL pressed";
     }
 
+    else if(e->modifiers() == Qt::AltModifier)
+    {
+        _altPressed = true;
+        qDebug() << "Alt pressed";
+    }
+
     else
     {
         _input_events.push(std::make_shared<QKeyEvent>(*e));
@@ -179,6 +186,11 @@ void GuiApplication::handleKeyRelease (QKeyEvent* e)
         _shiftPressed = false;
         qDebug() << "Shift released";
     }
+    if (e->type()==QEvent::KeyRelease && _altPressed == true)
+    {
+        _altPressed = false;
+        qDebug() << "Alt released";
+    }
 }
 
 void GuiApplication::handleGLInputEvents() { //for OpenGL methods
@@ -187,8 +199,17 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
   {
     const auto& e  = _input_events.front();
     const auto& ke = std::dynamic_pointer_cast<const QKeyEvent>(e);
-
+    const auto& we = std::dynamic_pointer_cast<const QWheelEvent>(e); //wheel events
     const auto& me = std::dynamic_pointer_cast<const QMouseEvent>(e); //for mouse events
+
+    if(we)
+    {
+        if(we->modifiers()==Qt::AltModifier) //and selectedobjects not empty)
+        {
+            int delta = we->delta();
+            _scenario.scaleObj(delta);
+        }
+    }
 
     if(ke and ke->key() == Qt::Key_P)
     {
@@ -200,6 +221,12 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
     {
         qDebug() << "A - select or deselect all objects";
         _scenario.toogleSelectionAllObjects();
+    }
+
+    if(ke and ke->key()==Qt::Key_C)
+    {
+        //_scenario.changeColorObject(_scenario._selectedObj);
+        _scenario.changeColor();
     }
 
     if( ke and ke->key() == Qt::Key_1)
@@ -242,6 +269,31 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
         _scenario.selectObjects(_endpos);
     }
 
+    if(me and me->buttons()==Qt::LeftButton)
+    {
+        if(me->modifiers()==Qt::AltModifier)
+        {
+            _scenario.moveObj(_startpos,_endpos);
+        }
+        if(me->modifiers()==Qt::ControlModifier)
+        {
+            _scenario.rotateObj(_startpos,_endpos);
+        }
+
+        if(me and me->type()==QEvent::MouseMove)
+        {
+            if(me->modifiers()==Qt::AltModifier)
+            {
+                _scenario.moveObj(_startpos,_endpos);
+            }
+
+            if(me->modifiers()==Qt::ControlModifier)
+            {
+                _scenario.rotateObj(_startpos,_endpos);
+            }
+        }
+    }
+
     _input_events.pop();
 
   }
@@ -249,26 +301,24 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
 
 void GuiApplication::handleMouseButtonPressedEvents(QMouseEvent *m)
 {
+    //update position
+    _startpos = _endpos;
+    _endpos.setX(m->pos().x());
+    _endpos.setY(m->pos().y());
+
     if( m->buttons() == Qt::LeftButton )
     {
-        qDebug() << "Left Mouse Button Pressed";
+        //qDebug() << "Left Mouse Button Pressed";
         _leftMousePressed = true;
-
-        _startpos = _endpos;
-        _endpos = {m->pos().x(),m->pos().y()};
     }
 
     if( m->buttons() == Qt::RightButton )
     {
-        qDebug() << "Right Mouse Button Pressed";
+        //qDebug() << "Right Mouse Button Pressed";
         _rightMousePressed = true;
-
-        _endpos.setX(m->pos().x());
-        _endpos.setY(m->pos().y());
     }
 
     _input_events.push(std::make_shared<QMouseEvent>(*m));
-
 }
 
 void GuiApplication::handleMouseMovementEvents(QMouseEvent *m)
@@ -276,9 +326,18 @@ void GuiApplication::handleMouseMovementEvents(QMouseEvent *m)
     if(m->type()==QEvent::MouseMove && _leftMousePressed == true)
     {
         _startpos = _endpos;
-        _endpos = {m->pos().x(),m->pos().y()};
+        _endpos.setX(m->pos().x());
+        _endpos.setY(m->pos().y());
 
-        _scenario.moveCamera(_startpos,_endpos);
+        if (m->modifiers() != Qt::NoModifier)
+        {
+            _input_events.push(std::make_shared<QMouseEvent>(*m));
+        }
+
+        if (m->modifiers() == Qt::NoModifier)
+        {
+            _scenario.moveCamera(_startpos,_endpos);
+        }
     }
 }
 
@@ -296,6 +355,7 @@ void GuiApplication::handleWheelEvents(QWheelEvent *w)
     int delta = w->delta();
 
     if (w->modifiers() == Qt::NoModifier)
+    //if (!w->modifiers())
     {
         //_scenario.lockObject(true);
         if (delta<0){_scenario.zoomCamera(0.95);}
@@ -312,6 +372,11 @@ void GuiApplication::handleWheelEvents(QWheelEvent *w)
     {
         _scenario.panVerticalCam(delta);
         //qDebug() << "ctrl incl";
+    }
+
+    if (w->modifiers() == Qt::AltModifier)
+    {
+        _input_events.push(std::make_shared<QWheelEvent>(*w));
     }
 }
 

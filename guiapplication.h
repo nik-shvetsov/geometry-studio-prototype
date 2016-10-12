@@ -29,6 +29,7 @@ private:
 
   bool                                        _controlPressed;
   bool                                        _shiftPressed;
+  bool                                        _altPressed;
 
   QPoint                                      _startpos;
   QPoint                                      _endpos;
@@ -46,13 +47,12 @@ private slots:
   void                                        handleMouseButtonPressedEvents(QMouseEvent*);
   void                                        handleMouseMovementEvents(QMouseEvent*);
   void                                        handleMouseButtonReleasedEvents(QMouseEvent*);
+  void                                        handleWheelEvents(QWheelEvent*);
 
   void                                        handleKeyPress( QKeyEvent* );
   void                                        handleKeyRelease( QKeyEvent* );
 
   void                                        handleGLInputEvents();
-
-  void                                        handleWheelEvents(QWheelEvent*);
 
 
 signals:

@@ -83,14 +83,25 @@ namespace ODDL
 
   #else
 
-    using int64                 = long;
-    using unsigned_int64        = unsigned long;
+//    using int64                 = long;
+//    using unsigned_int64        = unsigned long;
 
-    using machine               = long;
-    using unsigned_machine      = unsigned long;
+//    using machine               = long;
+//    using unsigned_machine      = unsigned long;
 
-    using machine_int           = long;
-    using unsigned_machine_int  = unsigned long;
+//    using machine_int           = long;
+//    using unsigned_machine_int  = unsigned long;
+
+    //-------------------------------------------- fix for 64
+
+    using int64                 = long long;
+    using unsigned_int64        = unsigned long long;
+
+    using machine               = long long;
+    using unsigned_machine      = unsigned long long;
+
+    using machine_int           = long long;
+    using unsigned_machine_int  = unsigned long long;
 
   #endif
 

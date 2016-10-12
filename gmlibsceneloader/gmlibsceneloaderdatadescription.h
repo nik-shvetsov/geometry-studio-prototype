@@ -15,10 +15,10 @@ enum class GMStructTypes {
 
 class GMlibSceneLoaderDataDescription : public ODDL::DataDescription{
 public:
-  GMlibSceneLoaderDataDescription() {}
-  ~GMlibSceneLoaderDataDescription() {}
+  //GMlibSceneLoaderDataDescription() {}
+  //~GMlibSceneLoaderDataDescription() {}
 
-//  using DataDescription::DataDescription;
+    using DataDescription::DataDescription;
 
 
   ODDL::Structure* CreateStructure(const ODDL::String &identifier) const override;

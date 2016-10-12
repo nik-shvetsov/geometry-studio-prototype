@@ -24,6 +24,16 @@ namespace GMlib {
   template <typename T, int n>
   class Vector;
 
+  template <typename T>
+  class PSphere;
+
+  template <typename T>
+  class PCylinder;
+
+  template <typename T>
+  class PPlane;
+
+
   class Angle;
 }
 
@@ -55,14 +65,14 @@ public:
   void                                              startSimulation();
   void                                              stopSimulation();
   void                                              toggleSimulation();
+  bool                                              isSimulationRunning();
 
   void                                              render( const QRect& viewport, GMlib::RenderTarget& target );
   void                                              prepare();
 
   void                                              replotTesttorus();
 
-  void                                              save();
-  void                                              load();
+
 
   GMlib::Point<int, 2>                              fromQtToGMlibViewPoint(const GMlib::Camera& cam, const QPoint& pos);
 
@@ -88,11 +98,29 @@ public:
   void                                              toogleSelectionAllObjects();
   void                                              deselectAllObjects();
 
+  //TODO
+
   void                                              camFly(GMlib::Vector<float,3> dS, GMlib::Angle dA, GMlib::Vector<float,3> axis);
   void                                              camFlyUp();
   void                                              camFlyDown();
   void                                              camFlyRight();
   void                                              camFlyLeft();
+
+  void                                              save();
+  void                                              load();
+  void                                              moveObj(const QPoint& begin_pos, const QPoint& end_pos);
+  void                                              rotateObj(const QPoint& begin_pos, const QPoint& end_pos);
+  void                                              scaleObj(int &delta);
+
+  void                                              insertObject();
+  void                                              changeColor();
+
+  //GMlib::SceneObject*                               _selectedObj = nullptr;
+
+
+
+  void                                              bezierForm(); //?
+  void                                              unlockObjs(); // ? unlock camera, return camera position to default
 
 protected:
   void                                              timerEvent(QTimerEvent *e) override;
@@ -119,10 +147,17 @@ private:
   std::shared_ptr<GMlib::PointLight>                _light;
   std::shared_ptr<TestTorus>                        _testtorus;
 
+  //std::shared_ptr<GMlib::Vector<GMlib::SceneObject>>    _selectedObjects;
+
+
+
 private:
   void                                              save( std::ofstream& os, const GMlib::SceneObject* obj);
   void                                              saveSO( std::ofstream& os, const GMlib::SceneObject* obj);
   void                                              savePT( std::ofstream& os, const GMlib::PTorus<float>* obj);
+  void                                              savePS( std::ofstream &os, const GMlib::PSphere<float> *obj);
+  void                                              savePC( std::ofstream &os, const GMlib::PCylinder<float> *obj);
+  void                                              savePP( std::ofstream &os, const GMlib::PPlane<float> *obj);
 
 private:
   static std::unique_ptr<Scenario>                  _instance;
