@@ -13,6 +13,7 @@
 GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, argv) {
 
   setApplicationDisplayName( "Hello GMlib app display name," );
+  //setApplicationDisplayName( "3DS Studio v2" );
 
   connect( &_window, &Window::sceneGraphInitialized,
            this,     &GuiApplication::onSceneGraphInitialized,
@@ -54,6 +55,7 @@ GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, a
 
   _window.setSource(QUrl("qrc:///qml/main.qml"));
   _window.show();
+ // _window.setTitle(" ");
 
 
 //button stance initializing
@@ -211,6 +213,18 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
         }
     }
 
+    if(ke and ke->key() == Qt::Key_N)
+    {
+        qDebug() << "Handling the N button - new sphere";
+        _scenario.insertSphere(1, _endpos);
+    }
+
+    if(ke and ke->key() == Qt::Key_D)
+    {
+        qDebug() << "Deleting selected objects";
+        _scenario.deleteObject();
+    }
+
     if(ke and ke->key() == Qt::Key_P)
     {
         qDebug() << "Handling the P button - replot Torus";
@@ -269,6 +283,11 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
         _scenario.selectObjects(_endpos);
     }
 
+    if ((me and me->buttons() == Qt::RightButton) && me->modifiers() == Qt::AltModifier)
+    {
+        _scenario.lockToObject(_endpos);
+    }
+
     if(me and me->buttons()==Qt::LeftButton)
     {
         if(me->modifiers()==Qt::AltModifier)
@@ -310,6 +329,12 @@ void GuiApplication::handleMouseButtonPressedEvents(QMouseEvent *m)
     {
         //qDebug() << "Left Mouse Button Pressed";
         _leftMousePressed = true;
+
+
+        //qDebug() << "endpos";
+        //qDebug() << _endpos;
+        //qDebug() << "startpos";
+        //qDebug() << _startpos;
     }
 
     if( m->buttons() == Qt::RightButton )
@@ -317,6 +342,8 @@ void GuiApplication::handleMouseButtonPressedEvents(QMouseEvent *m)
         //qDebug() << "Right Mouse Button Pressed";
         _rightMousePressed = true;
     }
+
+
 
     _input_events.push(std::make_shared<QMouseEvent>(*m));
 }

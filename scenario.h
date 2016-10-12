@@ -112,15 +112,16 @@ public:
   void                                              rotateObj(const QPoint& begin_pos, const QPoint& end_pos);
   void                                              scaleObj(int &delta);
 
-  void                                              insertObject();
   void                                              changeColor();
 
   //GMlib::SceneObject*                               _selectedObj = nullptr;
 
+  void                                              unlockObjs(); // unlock camera, return camera position to default
 
+  void                                              insertObject();
+  void                                              insertSphere(float radius, const QPoint& pos);
 
-  void                                              bezierForm(); //?
-  void                                              unlockObjs(); // ? unlock camera, return camera position to default
+  void                                              deleteObject();
 
 protected:
   void                                              timerEvent(QTimerEvent *e) override;

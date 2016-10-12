@@ -492,7 +492,7 @@ void Scenario::moveObj(const QPoint& begin_pos, const QPoint& end_pos)
 
     const float scale = cameraSpeedScale();
     auto deltaX = -(pos(0) - prev(0)) * scale / _camera->getViewportW();
-    auto deltaY = -(pos(1) - prev(1))  *scale / _camera->getViewportH();
+    auto deltaY = -(pos(1) - prev(1)) * scale / _camera->getViewportH();
 
     GMlib::Vector<float,3> delta (deltaX,deltaY,0);
 
@@ -560,6 +560,7 @@ void Scenario::changeColor()
 {
     const GMlib::Array<GMlib::SceneObject*> &selected_objects = _scene->getSelectedObjects();
 
+
     std::vector<GMlib::Material> colorsVec = {
         GMlib::GMmaterial::BlackPlastic,GMlib::GMmaterial::BlackRubber,
         GMlib::GMmaterial::Brass,GMlib::GMmaterial::Bronze,
@@ -575,30 +576,71 @@ void Scenario::changeColor()
         GMlib::GMmaterial::Snow, GMlib::GMmaterial::Turquoise
     };
 
+    //std::vector<GMlib::Material> colorsVec = {GMlib::GMmaterial::BlackPlastic, GMlib::GMmaterial::Ruby, GMlib::GMmaterial::Jade};
+
     for( int i = 0; i < selected_objects.getSize(); i++ )
     {
         GMlib::SceneObject* obj = selected_objects(i);
 
         const auto objMat = obj->getMaterial();
         int colorNum = 0;
-
-        for( unsigned int i = 0; i < colorsVec.size(); ++i )
+        for( unsigned int j = 0; j < colorsVec.size(); j++ )
         {
-            if (objMat == colorsVec[i])
+            if (objMat == colorsVec[j])
             {
-                colorNum = i;
+                colorNum = j;
                 break;
             }
         }
         colorNum++;
-        if(colorNum < 22) //colors.size()-2
+        int border = int(colorsVec.size()-2);
+        if(colorNum < border) //colors.size()-2
         {
+            //qDebug() << colorNum;
             obj->setMaterial(colorsVec[colorNum]);
         }
         else
         {
+            //qDebug() << "else";
             obj->setMaterial(colorsVec[0]);
         }
+    }
+}
+
+void Scenario::insertSphere(float radius, const QPoint& pos)
+{
+    auto sphere = new GMlib::PSphere<float>(radius);
+    sphere->toggleDefaultVisualizer();
+    sphere->replot(200,200,1,1);
+    sphere->setMaterial(GMlib::GMmaterial::Gold);
+
+    auto gmPos = fromQtToGMlibViewPoint(*_camera.get(), pos);
+    const float scale = cameraSpeedScale();
+    int diff = 12;
+    GMlib::Point<float,2> newPoint ( (gmPos(0))*scale / _camera->getViewportW() - diff,
+                                    (gmPos(1))*scale / _camera->getViewportH() - diff);
+    qDebug() << "Calculation:";
+    qDebug() << "fromQTtoGMLIB" << gmPos(0) << gmPos(1);
+    qDebug() << "Qpoint pos: " << pos.x() << " " << pos.y();
+    qDebug() << "Cam speed scale: " << scale;
+    qDebug() << "Cam Viewport W H: " << _camera->getViewportW() << " " << _camera->getViewportH();
+
+    qDebug() << "New point pos: "<< newPoint(0) <<  " " << newPoint(1);
+
+
+    sphere->translate(GMlib::Point<float,3>(newPoint(0),newPoint(1),0), true);
+
+    _scene->insert(sphere);
+}
+
+void Scenario::deleteObject()
+{
+    const GMlib::Array<GMlib::SceneObject*> &selected_objects = _scene->getSelectedObjects();
+
+    for( int i = 0; i < selected_objects.getSize(); i++ )
+    {
+        GMlib::SceneObject* obj = selected_objects(i);
+        _scene->remove(obj);
     }
 }
 
