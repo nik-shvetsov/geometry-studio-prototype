@@ -57,11 +57,45 @@ set( HDRS
   testtorus.h
   window.h
 
-  fileddl.h
-
   gmlibsceneloader/gmlibsceneloaderdatadescription.h
   gmlibsceneloader/gmlibversionstructure.h
 
+  gmlibsceneloader/sceneobjectstructure.h
+  gmlibsceneloader/sceneobjectdatastructure.h
+
+  gmlibsceneloader/psurfstructure.h
+  gmlibsceneloader/psurfdatastructure.h
+
+  gmlibsceneloader/ptorusstructure.h
+  gmlibsceneloader/ptorusdatastructure.h
+
+  gmlibsceneloader/pspherestructure.h
+  gmlibsceneloader/pspheredatastructure.h
+
+  gmlibsceneloader/pplanestructure.h
+  gmlibsceneloader/pplanedatastructure.h
+
+  gmlibsceneloader/pcylinderstructure.h
+  gmlibsceneloader/pcylinderdatastructure.h
+
+  gmlibsceneloader/pbeziersurfstructure.h
+  gmlibsceneloader/pbeziersurfdatastructure.h
+
+  gmlibsceneloader/colorstructure.h
+  gmlibsceneloader/setcolorstructure.h
+
+  gmlibsceneloader/materialstructure.h
+  gmlibsceneloader/setmaterialstructure.h
+
+  #gmlibsceneloader/propertystructure.h
+
+  gmlibsceneloader/enabledefaultvisualizerstructure.h
+  gmlibsceneloader/replotstructure.h
+  gmlibsceneloader/setstructure.h
+  gmlibsceneloader/setpositionstructure.h
+  gmlibsceneloader/setlightedstructure.h
+  gmlibsceneloader/setvisiblestructure.h
+  gmlibsceneloader/setcollapsedstructure.h
   )
 
 set( SRCS
@@ -73,10 +107,45 @@ set( SRCS
   testtorus.cpp
   window.cpp
 
-  fileddl.cpp
-
   gmlibsceneloader/gmlibsceneloaderdatadescription.cpp
   gmlibsceneloader/gmlibversionstructure.cpp
+
+  gmlibsceneloader/sceneobjectstructure.cpp
+  gmlibsceneloader/sceneobjectdatastructure.cpp
+
+  gmlibsceneloader/psurfstructure.cpp
+  gmlibsceneloader/psurfdatastructure.cpp
+
+  gmlibsceneloader/ptorusstructure.cpp
+  gmlibsceneloader/ptorusdatastructure.cpp
+
+  gmlibsceneloader/pspherestructure.cpp
+  gmlibsceneloader/pspheredatastructure.cpp
+
+  gmlibsceneloader/pplanestructure.cpp
+  gmlibsceneloader/pplanedatastructure.cpp
+
+  gmlibsceneloader/pcylinderstructure.cpp
+  gmlibsceneloader/pcylinderdatastructure.cpp
+
+  gmlibsceneloader/pbeziersurfstructure.cpp
+  gmlibsceneloader/pbeziersurfdatastructure.cpp
+
+  gmlibsceneloader/colorstructure.cpp
+  gmlibsceneloader/setcolorstructure.cpp
+
+  gmlibsceneloader/materialstructure.cpp
+  gmlibsceneloader/setmaterialstructure.cpp
+
+  #gmlibsceneloader/propertystructure.cpp
+
+  gmlibsceneloader/enabledefaultvisualizerstructure.cpp
+  gmlibsceneloader/replotstructure.cpp
+  gmlibsceneloader/setstructure.cpp
+  gmlibsceneloader/setpositionstructure.cpp
+  gmlibsceneloader/setlightedstructure.cpp
+  gmlibsceneloader/setvisiblestructure.cpp
+  gmlibsceneloader/setcollapsedstructure.cpp
 
   main.cpp
   )

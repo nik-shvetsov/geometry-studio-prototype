@@ -40,10 +40,12 @@ namespace GMlib {
 // qt
 #include <QObject>
 #include <QRect>
+#include <QDebug>
 
 // stl
 #include <iostream>
 #include <memory>
+#include <queue>
 
 //struct ViewPair
 //{
@@ -74,12 +76,11 @@ public:
 
 
 
-  GMlib::Point<int, 2>                              fromQtToGMlibViewPoint(const GMlib::Camera& cam, const QPoint& pos);
+  GMlib::Point<int, 2>                              fromQtToGMlibViewPoint(const QPoint& pos);
 
   void                                              moveCamera(const QPoint& begin_pos, const QPoint& end_pos);
-  float                                             cameraSpeedScale();
+  float                                             getScale();
   void                                              zoomCamera(const float &zoom_val);
-  //void                                              lockObject(const bool &lockvar);
   void                                              panHorizontalCam(int wheel_delta);
   void                                              panVerticalCam(int wheel_delta);
   void                                              switchCam(int n);
@@ -98,30 +99,21 @@ public:
   void                                              toogleSelectionAllObjects();
   void                                              deselectAllObjects();
 
-  //TODO
-
-  void                                              camFly(GMlib::Vector<float,3> dS, GMlib::Angle dA, GMlib::Vector<float,3> axis);
-  void                                              camFlyUp();
-  void                                              camFlyDown();
-  void                                              camFlyRight();
-  void                                              camFlyLeft();
-
+  void                                              camFly(char direction);
   void                                              save();
   void                                              load();
   void                                              moveObj(const QPoint& begin_pos, const QPoint& end_pos);
   void                                              rotateObj(const QPoint& begin_pos, const QPoint& end_pos);
   void                                              scaleObj(int &delta);
-
   void                                              changeColor();
-
-  //GMlib::SceneObject*                               _selectedObj = nullptr;
-
-  void                                              unlockObjs(); // unlock camera, return camera position to default
-
+  void                                              resetCam(); // unlock camera, return camera position to default
   void                                              insertObject();
   void                                              insertSphere(float radius, const QPoint& pos);
-
   void                                              deleteObject();
+
+  void                                              testsPoint(const QPoint& pos);
+
+  std::queue<std::shared_ptr<GMlib::SceneObject>>   _sceneObjectQueue;
 
 protected:
   void                                              timerEvent(QTimerEvent *e) override;
@@ -133,6 +125,7 @@ private:
   std::shared_ptr<GMlib::DefaultSelectRenderer>     _select_renderer;
   std::shared_ptr<GMlib::DefaultRenderer>           _renderer { nullptr }; //active renderer
   std::shared_ptr<GMlib::Camera>                    _camera   { nullptr }; //active cam
+
 
 
   //std::vector<std::shared_ptr<GMlib::Camera>>             _camerasVec;
@@ -150,8 +143,6 @@ private:
 
   //std::shared_ptr<GMlib::Vector<GMlib::SceneObject>>    _selectedObjects;
 
-
-
 private:
   void                                              save( std::ofstream& os, const GMlib::SceneObject* obj);
   void                                              saveSO( std::ofstream& os, const GMlib::SceneObject* obj);
@@ -164,6 +155,18 @@ private:
   static std::unique_ptr<Scenario>                  _instance;
 public:
   static Scenario&                                  instance();
+
+
+public slots:
+  void clicksave()
+  {
+      this->save();
+  }
+
+  void clickload()
+  {
+      this->load();
+  }
 };
 
 #endif

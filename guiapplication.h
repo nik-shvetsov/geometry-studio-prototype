@@ -37,6 +37,7 @@ private:
   QPoint                                      _qpos;
 
   std::queue<std::shared_ptr<QInputEvent>>    _input_events;
+
   
 
 private slots:

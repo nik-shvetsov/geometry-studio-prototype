@@ -4,10 +4,13 @@
 #include <QOpenGLContext>
 #include <QDebug>
 
+#include <QQmlContext>
+#include <QQuickItem>
+#include <QStringListModel>
+
 // stl
 #include <iostream>
 #include <cassert>
-
 
 
 GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, argv) {
@@ -52,6 +55,9 @@ GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, a
           this,     &GuiApplication::handleWheelEvents);
 
 
+  _window.rootContext()->setContextProperty( "scenario", &_scenario);
+  //_window.rootContext()->setContextProperty( "save", _scenario.save());
+  //_window.rootContext()->setContextProperty( "load", _scenario.load());
 
   _window.setSource(QUrl("qrc:///qml/main.qml"));
   _window.show();
@@ -116,36 +122,43 @@ void GuiApplication::handleKeyPress( QKeyEvent* e ) {
     else if(e->key() == Qt::Key_S)
     {
         _scenario.save();
-        qDebug() << "File saved";
-
+        //qDebug() << "File saved";
     }
 
-    else if(e->key() == Qt::Key_O)
+    else if(e->key() == Qt::Key_L)
     {
         _scenario.load();
-        qDebug() << "File loaded";
+        //qDebug() << "File loaded";
     }
 
     //cam fly controls
 
+    else if (e->key() == Qt::Key_U)
+    {
+
+        _scenario.resetCam();
+        qDebug() << "Reseting cam";
+    }
+
+
     else if (e->key() == Qt::Key_Up)
     {
-        _scenario.camFlyUp();
+        _scenario.camFly('F');
     }
 
     else if (e->key() == Qt::Key_Down)
     {
-        _scenario.camFlyDown();
+        _scenario.camFly('B');
     }
 
     else if (e->key() == Qt::Key_Right)
     {
-        _scenario.camFlyRight();
+        _scenario.camFly('R');
     }
 
     else if (e->key() == Qt::Key_Left)
     {
-        _scenario.camFlyLeft();
+        _scenario.camFly('L');
     }
 
     //end cam fly controls
@@ -239,35 +252,33 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
 
     if(ke and ke->key()==Qt::Key_C)
     {
-        //_scenario.changeColorObject(_scenario._selectedObj);
         _scenario.changeColor();
     }
 
     if( ke and ke->key() == Qt::Key_1)
     {
-        qDebug() << "Pressing E - switch cam to Proj";
+        qDebug() << "Pressing 1 - switch cam to Proj";
         _scenario.switchCam(1);
     }
     if( ke and ke->key() == Qt::Key_2)
     {
-        qDebug() << "Pressing E - switch cam to Front";
+        qDebug() << "Pressing 2 - switch cam to Front";
         _scenario.switchCam(2);
     }
     if( ke and ke->key() == Qt::Key_3)
     {
-        qDebug() << "Pressing E - switch cam to Side";
+        qDebug() << "Pressing 3 - switch cam to Side";
         _scenario.switchCam(3);
     }
     if( ke and ke->key() == Qt::Key_4)
     {
-        qDebug() << "Pressing E - switch cam to Top";
+        qDebug() << "Pressing 4 - switch cam to Top";
         _scenario.switchCam(4);
     }
 
     if(ke and ke->key() == Qt::Key_R)
     {
         qDebug() << "Handling the R button - toggle simulation";
-        //_scenario.stopSimulation();
         _scenario.toggleSimulation();
     }
 
@@ -331,8 +342,10 @@ void GuiApplication::handleMouseButtonPressedEvents(QMouseEvent *m)
         _leftMousePressed = true;
 
 
-        //qDebug() << "endpos";
-        //qDebug() << _endpos;
+        //qDebug() << "QPoint";
+        qDebug() << _endpos;
+        _scenario.testsPoint(_endpos);
+
         //qDebug() << "startpos";
         //qDebug() << _startpos;
     }
@@ -342,8 +355,6 @@ void GuiApplication::handleMouseButtonPressedEvents(QMouseEvent *m)
         //qDebug() << "Right Mouse Button Pressed";
         _rightMousePressed = true;
     }
-
-
 
     _input_events.push(std::make_shared<QMouseEvent>(*m));
 }
@@ -385,8 +396,14 @@ void GuiApplication::handleWheelEvents(QWheelEvent *w)
     //if (!w->modifiers())
     {
         //_scenario.lockObject(true);
-        if (delta<0){_scenario.zoomCamera(0.95);}
-        if (delta>0) {_scenario.zoomCamera(1.05);}
+        if (delta<0)
+        {
+            _scenario.zoomCamera(0.95);
+        }
+        if (delta>0)
+        {
+            _scenario.zoomCamera(1.05);
+        }
     }
 
     if (w->modifiers() == Qt::ShiftModifier)

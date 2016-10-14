@@ -181,12 +181,10 @@ Scenario::initializeScenario() {
 
   _testtorus->test01();
 
-  auto plane = new GMlib::PPlane<float> (GMlib::Point<float,3>(-5,0,0), GMlib::Vector<float,3>(10,0,0), GMlib::Vector<float,3>(0,20,0));
-  plane->toggleDefaultVisualizer();
-  plane->replot(50,50,1,1);
-  _scene->insert(plane);
-
-  //----------------------
+  auto testplane = new GMlib::PPlane<float> (GMlib::Point<float,3>(-5,0,0), GMlib::Vector<float,3>(10,0,0), GMlib::Vector<float,3>(0,20,0));
+  testplane->toggleDefaultVisualizer();
+  testplane->replot(50,50,1,1);
+  _scene->insert(testplane);
 }
 
 std::unique_ptr<Scenario> Scenario::_instance {nullptr};
@@ -256,14 +254,8 @@ Scenario::isSimulationRunning()
 void
 Scenario::replotTesttorus() { _testtorus->replot(4, 4, 1, 1); }
 
-float Scenario::cameraSpeedScale()
+float Scenario::getScale()
 {
-    if( !_camera )
-      return 1.0f;
-
-    if(_camera->isLocked())
-      return M_2PI * _camera->getLockDist();
-
     return _scene->getSphere().getRadius();
 }
 
@@ -275,17 +267,34 @@ float Scenario::cameraSpeedScale()
 //    }
 //}
 
+void Scenario::resetCam()
+{
+    auto init_cam_pos       = GMlib::Point<float,3>(  0.0f, 0.0f, 0.0f );
+    auto init_cam_dir       = GMlib::Vector<float,3>( 0.0f, 1.0f, 0.0f );
+    auto init_cam_up        = GMlib::Vector<float,3>(  0.0f, 0.0f, 1.0f );
+
+    if(_camera->isLocked())
+    {
+        _camera->unLock();
+    }
+    _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
+    _camera->rotateGlobal( GMlib::Angle(-45), GMlib::Vector<float,3>( 1.0f, 0.0f, 0.0f ) );
+    _camera->translateGlobal( GMlib::Vector<float,3>( 0.0f, -20.0f, 20.0f ) );
+
+}
+
 void Scenario::moveCamera(const QPoint& begin_pos, const QPoint& end_pos)
 {
-    auto pos = fromQtToGMlibViewPoint(*_camera.get(), begin_pos);
-    auto prev = fromQtToGMlibViewPoint(*_camera.get(), end_pos);
+    auto pos = fromQtToGMlibViewPoint(begin_pos);
+    auto prev = fromQtToGMlibViewPoint(end_pos);
 
-    const float scale = cameraSpeedScale();
-    GMlib::Vector<float,2> delta ( -(pos(0) - prev(0))*scale / _camera->getViewportW(),
-                                    (pos(1) - prev(1))*scale / _camera->getViewportH()      );
+    const float scale = getScale();
+    auto deltaX = (pos(0) - prev(0)) * scale / _camera->getViewportW();
+    auto deltaY = -(pos(1) - prev(1)) * scale / _camera->getViewportH();
 
-    //delta*=0.01;
+    GMlib::Vector<float,2> delta (deltaX,deltaY);
     _camera->move( delta );
+
 }
 
 void Scenario::zoomCamera(const float &zoom_val)
@@ -295,42 +304,41 @@ void Scenario::zoomCamera(const float &zoom_val)
 
 void Scenario::panHorizontalCam(int wheel_delta)
 {
-    _camera->move(GMlib::Vector<float,2> (wheel_delta * cameraSpeedScale() / _camera->getViewportH(), 0.0f));
+    _camera->move(GMlib::Vector<float,2> (wheel_delta * getScale() / _camera->getViewportH(), 0.0f));
 }
 
 void Scenario::panVerticalCam(int wheel_delta)
 {
-    _camera->move(GMlib::Vector<float,2>(0.0f, wheel_delta * cameraSpeedScale() / _camera->getViewportW()));
+    _camera->move(GMlib::Vector<float,2>(0.0f, wheel_delta * getScale() / _camera->getViewportW()));
 }
 
 void Scenario::switchCam(int n)
 {
     //auto init_viewport_size = 600;
-    auto init_cam_pos       = GMlib::Point<float,3>(  0.0f, 0.0f, 0.0f );
-    auto init_cam_dir       = GMlib::Vector<float,3>( 0.0f, 1.0f, 0.0f );
-    auto init_cam_up        = GMlib::Vector<float,3>(  0.0f, 0.0f, 1.0f );
+    auto init_cam_pos = GMlib::Point<float,3>(  0.0f, 0.0f, 0.0f );
+    auto init_cam_dir = GMlib::Vector<float,3>( 0.0f, 1.0f, 0.0f );
+    auto init_cam_up = GMlib::Vector<float,3>(  0.0f, 0.0f, 1.0f );
+    _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
+
+
     switch (n)
     {
     case 1:
-        _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
         _camera->rotateGlobal( GMlib::Angle(-45), GMlib::Vector<float,3>( 1.0f, 0.0f, 0.0f ) );
         _camera->translateGlobal( GMlib::Vector<float,3>( 0.0f, -20.0f, 20.0f ) );
         qDebug() << "Projection cam";
         break;
     case 2:
-        _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
         _camera->rotateGlobal( GMlib::Angle(0), GMlib::Vector<float,3>( 1.0f, 0.0f, 0.0f ) );
         _camera->translateGlobal( GMlib::Vector<float,3>( 0.0f, -20.0f, 0.0f ) );
         qDebug() << "Front cam";
         break;
     case 3:
-        _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
         _camera->rotateGlobal( GMlib::Angle(90), GMlib::Vector<float,3>( 0.0f, 1.0f, 0.0f ) );
         _camera->translateGlobal( GMlib::Vector<float,3>( 0.0f, -20.0f, 0.0f ) );
         qDebug() << "Side cam";
         break;
     case 4:
-        _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
         _camera->rotateGlobal( GMlib::Angle(-90), GMlib::Vector<float,3>( 1.0f, 0.0f, 0.0f ) );
         _camera->translateGlobal( GMlib::Vector<float,3>( 0.0f, 0.0f, 20.0f ) );
         qDebug() << "Top cam";
@@ -339,55 +347,44 @@ void Scenario::switchCam(int n)
     _renderer->render();
 }
 
-void Scenario::camFly(GMlib::Vector<float,3> dS, GMlib::Angle dA, GMlib::Vector<float,3> axis)
+void Scenario::camFly(char direction)
 {
+    auto dS = GMlib::Vector<float,3>(0,0,0);
+    auto dA = GMlib::Angle(0);
+    auto axisZ = GMlib::Vector<float,3>(0,0,1);
+
+    if (direction=='F')
+    {
+        //dS = GMlib::Vector<float,3>(0,0.1,0);
+        dS = _camera->getGlobalDir() * 0.1;
+    }
+    if (direction=='B')
+    {
+        //dS = GMlib::Vector<float,3>(0,-0.1,0);
+        dS = _camera->getGlobalDir() * -0.1;
+    }
+    if (direction=='R')
+    {
+        dA = GMlib::Angle(-1);
+    }
+
+    if (direction=='L')
+    {
+        dA = GMlib::Angle(1);
+    }
+
     _camera->translateGlobal(dS);
-    _camera->rotateGlobal(dA, axis);
+    _camera->rotateGlobal(dA, axisZ);
 }
-
-void Scenario::camFlyUp()
-{
-    auto dS = GMlib::Vector<float,3>(0,0,0.1);
-    auto dA = GMlib::Angle(0);
-    auto axis = GMlib::Vector<float,3>(0,0,1);
-
-    camFly(dS,dA,axis);
-}
-
-void Scenario::camFlyDown()
-{
-    auto dS = GMlib::Vector<float,3>(0,0,-0.1);
-    auto dA = GMlib::Angle(0);
-    auto axis = GMlib::Vector<float,3>(0,0,1);
-
-    camFly(dS,dA,axis);
-}
-
-void Scenario::camFlyRight()
-{
-    auto dS = GMlib::Vector<float,3>(0.1,0,0);
-    auto dA = GMlib::Angle(0);
-    auto axis = GMlib::Vector<float,3>(0,0,1);
-
-    camFly(dS,dA,axis);
-}
-
-void Scenario::camFlyLeft()
-{
-    auto dS = GMlib::Vector<float,3>(-0.1,0,0);
-    auto dA = GMlib::Angle(0);
-    auto axis = GMlib::Vector<float,3>(0,0,1);
-
-    camFly(dS,dA,axis);
-}
-
-//
 
 
 void Scenario::lockToObject(const QPoint& qpos)
 {
     auto selected_obj = findSceneObj(qpos);
-    if( selected_obj ) {_camera->lock( selected_obj );}
+    if( selected_obj )
+    {
+        _camera->lock( selected_obj );
+    }
     else
         if(_camera->isLocked())
         {
@@ -406,10 +403,8 @@ void Scenario::selectObject(const QPoint& qpos)
     if( !selected_obj ) return;
 
     auto selected = selected_obj->isSelected(); //bool
-    deselectAllObjects(); //for selecting only 1 object at a time
-    selected_obj->setSelected( !selected );
-
-    //_selectedObj = selected_obj;
+    deselectAllObjects();                       //for selecting only 1 object at a time
+    selected_obj->setSelected( !selected );     //select after deselection
 }
 
 void Scenario::selectObjects(const QPoint& qpos)
@@ -427,7 +422,8 @@ void Scenario::deselectAllObjects()
 void Scenario::selectSubObjects(GMlib::SceneObject* object)
 {
     GMlib::Camera *cam   = dynamic_cast<GMlib::Camera*>( object );
-    GMlib::Light  *light = dynamic_cast<GMlib::Light*>( object );
+    GMlib::Light  *light = dynamic_cast<GMlib::Light*>( object );    //also objects, need to avoid
+
     if( !cam && !light ) {object->setSelected(true);}
 
     for( int i = 0; i < object->getChildren().getSize(); i++ )
@@ -443,7 +439,7 @@ void Scenario::selectAllObjects()
     GMlib::Scene *scene = _scene.get();
     for( int i = 0; i < scene->getSize(); ++i )
     {
-        selectSubObjects( (*scene)[i] );
+        selectSubObjects( (*scene)[i] ); //scene contains all added objects
     }
 }
 
@@ -461,11 +457,10 @@ void Scenario::toogleSelectionAllObjects()
 
 GMlib::SceneObject* Scenario::findSceneObj(const QPoint& qpos)
 {
-    GMlib::Point<int,2> pos = fromQtToGMlibViewPoint(*_camera.get(), qpos);
+    GMlib::Point<int,2> pos = fromQtToGMlibViewPoint(qpos);
     GMlib::SceneObject* selected_obj = nullptr;
 
     const GMlib::Vector<int,2> size(_camera->getViewportW(), _camera->getViewportH());
-    //const GMlib::Vector<int,2> size(QRect(0,0,200,200).width(), QRect(0,0,200,200).height());
 
     _select_renderer->setCamera(_camera.get());
     _select_renderer->reshape(size);
@@ -487,10 +482,10 @@ GMlib::SceneObject* Scenario::findSceneObj(const QPoint& qpos)
 
 void Scenario::moveObj(const QPoint& begin_pos, const QPoint& end_pos)
 {
-    auto pos = fromQtToGMlibViewPoint(*_camera.get(), begin_pos);
-    auto prev = fromQtToGMlibViewPoint(*_camera.get(), end_pos);
+    auto pos = fromQtToGMlibViewPoint(begin_pos);
+    auto prev = fromQtToGMlibViewPoint(end_pos);
 
-    const float scale = cameraSpeedScale();
+    const float scale = getScale();
     auto deltaX = -(pos(0) - prev(0)) * scale / _camera->getViewportW();
     auto deltaY = -(pos(1) - prev(1)) * scale / _camera->getViewportH();
 
@@ -507,8 +502,8 @@ void Scenario::moveObj(const QPoint& begin_pos, const QPoint& end_pos)
 
 void Scenario::rotateObj(const QPoint& begin_pos, const QPoint& end_pos)
 {
-    auto rot_pos = fromQtToGMlibViewPoint(*_camera.get(), begin_pos);
-    auto rot_prev = fromQtToGMlibViewPoint(*_camera.get(), end_pos);
+    auto rot_pos = fromQtToGMlibViewPoint(begin_pos);
+    auto rot_prev = fromQtToGMlibViewPoint(end_pos);
 
     auto difX = float(rot_pos(0) - rot_prev(0));
     auto difY = float(rot_pos(1) - rot_prev(1));
@@ -527,19 +522,14 @@ void Scenario::rotateObj(const QPoint& begin_pos, const QPoint& end_pos)
         GMlib::SceneObject* obj = selected_objects(i);
         obj->rotateGlobal(angle,rotDir);
     }
-
-//    if(_selectedObj)
-//    {
-//        _selectedObj->rotateGlobal(angle,rotDir);
-//    }
 }
 
 void Scenario::scaleObj(int &delta)
 {
     const GMlib::Array<GMlib::SceneObject*> &selected_objects = _scene->getSelectedObjects();
 
-    const float plus_val = 1.02;
-    const float minus_val = 0.98;
+    const float plus_val = 1.01;
+    const float minus_val = 0.99;
 
     for( int i = 0; i < selected_objects.getSize(); i++ )
     {
@@ -547,11 +537,11 @@ void Scenario::scaleObj(int &delta)
 
         if(delta>0)
         {
-            obj->scale( GMlib::Vector<float,3>( 0.1f + plus_val) );
+            obj->scale( plus_val );
         }
         else
         {
-            obj->scale( GMlib::Vector<float,3>( 0.1f - minus_val) );
+            obj->scale( -minus_val );
         }
     }
 }
@@ -575,8 +565,6 @@ void Scenario::changeColor()
         GMlib::GMmaterial::Sapphire, GMlib::GMmaterial::Silver,
         GMlib::GMmaterial::Snow, GMlib::GMmaterial::Turquoise
     };
-
-    //std::vector<GMlib::Material> colorsVec = {GMlib::GMmaterial::BlackPlastic, GMlib::GMmaterial::Ruby, GMlib::GMmaterial::Jade};
 
     for( int i = 0; i < selected_objects.getSize(); i++ )
     {
@@ -614,21 +602,22 @@ void Scenario::insertSphere(float radius, const QPoint& pos)
     sphere->replot(200,200,1,1);
     sphere->setMaterial(GMlib::GMmaterial::Gold);
 
-    auto gmPos = fromQtToGMlibViewPoint(*_camera.get(), pos);
-    const float scale = cameraSpeedScale();
+    auto gmPos = fromQtToGMlibViewPoint(pos);
+    const float scale = getScale();
     int diff = 12;
     GMlib::Point<float,2> newPoint ( (gmPos(0))*scale / _camera->getViewportW() - diff,
                                     (gmPos(1))*scale / _camera->getViewportH() - diff);
-    qDebug() << "Calculation:";
-    qDebug() << "fromQTtoGMLIB" << gmPos(0) << gmPos(1);
-    qDebug() << "Qpoint pos: " << pos.x() << " " << pos.y();
-    qDebug() << "Cam speed scale: " << scale;
-    qDebug() << "Cam Viewport W H: " << _camera->getViewportW() << " " << _camera->getViewportH();
+    //qDebug() << "Calculation:";
+    //qDebug() << "fromQTtoGMLIB" << gmPos(0) << gmPos(1);
+    //qDebug() << "Qpoint pos: " << pos.x() << " " << pos.y();
+    //qDebug() << "Cam speed scale: " << scale;
+    //qDebug() << "Cam Viewport W H: " << _camera->getViewportW() << " " << _camera->getViewportH();
 
-    qDebug() << "New point pos: "<< newPoint(0) <<  " " << newPoint(1);
+    //qDebug() << "New point pos: "<< newPoint(0) <<  " " << newPoint(1);
 
+    sphere->set(newPoint, GMlib::Vector<float,3>(0,1,0), GMlib::Vector<float,3>(0,0,1));
 
-    sphere->translate(GMlib::Point<float,3>(newPoint(0),newPoint(1),0), true);
+    //sphere->translate(GMlib::Point<float,3>(newPoint(0),newPoint(1),0), true);
 
     _scene->insert(sphere);
 }
@@ -645,9 +634,9 @@ void Scenario::deleteObject()
 }
 
 // Makes a point for camera movement
-GMlib::Point<int, 2> Scenario::fromQtToGMlibViewPoint(const GMlib::Camera& cam, const QPoint& pos)
+GMlib::Point<int, 2> Scenario::fromQtToGMlibViewPoint(const QPoint& pos)
 {
-    int h = cam.getViewportH(); // Height of the camera’s viewport
+    int h = _camera->getViewportH(); // Height of the camera’s viewport
 
     // QPoint
     int qPointX = pos.x();
@@ -658,6 +647,13 @@ GMlib::Point<int, 2> Scenario::fromQtToGMlibViewPoint(const GMlib::Camera& cam, 
     int pointY = h - qPointY - 1;
 
     return GMlib::Point<int, 2> (pointX, pointY);
+}
+
+void Scenario::testsPoint(const QPoint& pos)
+{
+    GMlib::Point<int, 2> newpos = fromQtToGMlibViewPoint(pos);
+    qDebug() << "GMlib pos:";
+    qDebug() << newpos(0) << "," << newpos(1);
 }
 
 void Scenario::load() {
@@ -676,8 +672,8 @@ void Scenario::load() {
     return;
   }
 
-  is.seekg( 0, std::ios_base::end );
-  auto buff_length = is.tellg();
+  is.seekg( 0, std::ios_base::end ); //Sets the position of the next character to be extracted from the input stream
+  auto buff_length = is.tellg(); //Get position in input sequence - buffer length
   is.seekg( 0, std::ios_base::beg );
 
   std::vector<char> buffer(buff_length);
@@ -689,40 +685,116 @@ void Scenario::load() {
   GMlibSceneLoaderDataDescription gsdd;
 
   ODDL::DataResult result = gsdd.ProcessText(buffer.data());
-  if(result != ODDL::kDataOkay) {
 
-    auto res_to_char = [](auto nr, const ODDL::DataResult& result) {
+  //for error
+  if(result != ODDL::kDataOkay)
+  {
+    auto res_to_char = [](auto nr, const ODDL::DataResult& result)
+    {
       return char(((0xff << (8*nr)) & result ) >> (8*nr));
     };
 
-    auto res_to_str = [&res_to_char](const ODDL::DataResult& result) {
+    auto res_to_str = [&res_to_char](const ODDL::DataResult& result)
+    {
       return std::string() + res_to_char(3,result) + res_to_char(2,result) + res_to_char(1,result) + res_to_char(0,result);
     };
 
-    std::cerr << "Data result no A-OK: " << res_to_str(result) << " (" << result << ")" << std::endl;
+    std::cerr << "!Data result not OK: " << res_to_str(result) << " (" << result << ")" << std::endl;
     return;
   }
 
-  std::cout << "Data result A-OK" << std::endl;
-  auto structure = gsdd.GetRootStructure()->GetFirstSubnode();
-  while(structure) {
+  std::cout << "Data result OK" << std::endl;
 
-    // Do something ^^,
-    // Travers the ODDL structures and build your scene objects
+  auto root = gsdd.GetRootStructure();
+  auto children = root->GetSubnodeCount();
+  auto node = root->GetFirstSubnode();
+  bool done = false;
 
-    structure = structure->Next();
+  while (!done)
+  {
+      std::shared_ptr<GMlib::SceneObject> objectToQueue = nullptr;
+
+      for( auto i = 0; i < children; i++)
+      {
+          if( node->GetStructureType() == int( GMStructTypes::PTorus))
+          {
+              std::shared_ptr<GMlib::PTorus<float>> torus = std::make_shared<GMlib::PTorus<float>>();
+              torus->toggleDefaultVisualizer();
+              torus->replot(200,200,1,1);
+              objectToQueue = torus;
+          }
+          else if( node->GetStructureType() == int( GMStructTypes::PSphere))
+          {
+              std::shared_ptr<GMlib::PSphere<float>> sphere = std::make_shared<GMlib::PSphere<float>>();
+              sphere->toggleDefaultVisualizer();
+              sphere->replot(50, 50, 10, 10);
+              objectToQueue = sphere;
+          }
+          else if( node->GetStructureType() == int( GMStructTypes::PCylinder))
+          {
+              std::shared_ptr<GMlib::PCylinder<float>> cylinder = std::make_shared<GMlib::PCylinder<float>>();
+              cylinder->toggleDefaultVisualizer();
+              cylinder->replot(50, 50, 10, 10);
+              objectToQueue = cylinder;
+          }
+
+          else if( node->GetStructureType() == int( GMStructTypes::GMlibVersion ) )
+          {
+              if( node->GetFirstSubnode() )
+              {
+                  auto child = node->GetFirstSubnode();
+
+                  if( child->GetStructureType() == int( ODDL::kDataInt32))
+                  {
+
+                      auto data = static_cast<ODDL::DataStructure<ODDL::Int32DataType>*>(child);
+                      std::cout << data << std::endl;
+
+                      if( data->GetDataElement(0) == GM_VERSION)
+                      {
+                          std::cout << "Valid GMlibVersion" << std::endl;
+                      }
+                      else std::cout << "Non-valid GMlibVersion" << std::endl;
+                  }
+                  else std::cout << "Non-valid GMlibVersion" << std::endl;
+              }
+          }
+      }
+
+      _sceneObjectQueue.push(objectToQueue);
+      if(!node)
+      {
+          if( node->Next() )
+          {
+              node = node->Next();
+          }
+      }
+      else done = true;
+  }
+  //end of load
+
+  //scene insert
+  while(!_sceneObjectQueue.empty())
+  {
+      auto obj = _sceneObjectQueue.front();
+      if(obj)
+      {
+          _scene->insert(obj.get());
+      }
+      _sceneObjectQueue.pop();
   }
 
-  // Load GMlib::SceneObjects into the scene.
-
+  startSimulation();
 }
 
 void
 Scenario::save() {
 
   qDebug() << "Saving scene...";
-  //SimStateLock a(*this);
+  SimStateLock a(*this);
+
   stopSimulation();
+  //if (a._state)toggleSimulation();
 
   auto filename = std::string("gmlib_save.openddl");
   auto os = std::ofstream(filename,std::ios_base::out);
@@ -740,17 +812,23 @@ Scenario::save() {
      << " } }"
      << std::endl;
 
+//  auto &scene = *_scene;
+//  for( auto i = 0; i < scene.getSize(); ++i )
+//  {
+//    const auto obj = scene[i];
+//    save(os,obj);
+//  }
 
-  auto &scene = *_scene;
-  for( auto i = 0; i < scene.getSize(); ++i )
+  for( auto i = 0; i < _scene->getSize(); i++ )
   {
-    const auto obj = scene[i];
-    save(os,obj);
+      const auto obj = (*_scene)[i];
+      save( os, obj );
   }
 
   startSimulation();
-  qDebug() << "The scene was success saved. Starting simulation.";
+  //if (!a._state) toggleSimulation();
 
+  qDebug() << "The scene was success saved. Starting simulation.";
 }
 
 void Scenario::save(std::ofstream &os, const GMlib::SceneObject *obj)

@@ -38,7 +38,24 @@ Item {
 
           opacity: 0.7
 
-          model: [ "Save", "Load"]
+          model: [ "Menu", "Save", "Load"]
+          //currentIndex: -1
+
+          //onCurrentIndexChanged: console.debug(currentIndex)
+          onCurrentIndexChanged: toggle()
+
+          function toggle() {
+              if (currentIndex === 1)
+              {
+                  scenario.clicksave()
+                  currentIndex = 0
+              }
+              if (currentIndex === 2)
+              {
+                  scenario.clickload()
+                  currentIndex = 0
+              }
+          }
         }
 
     }
