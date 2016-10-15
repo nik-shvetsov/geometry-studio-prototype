@@ -72,7 +72,8 @@ public:
   void                                              render( const QRect& viewport, GMlib::RenderTarget& target );
   void                                              prepare();
 
-  void                                              replotTesttorus();
+  void                                              replotLow();
+  void                                              replotHigh();
 
 
 

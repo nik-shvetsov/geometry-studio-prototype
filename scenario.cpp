@@ -128,6 +128,7 @@ Scenario::initializeScenario() {
     _camera->rotateGlobal( GMlib::Angle(-45), GMlib::Vector<float,3>( 1.0f, 0.0f, 0.0f ) );
     _camera->translateGlobal( GMlib::Vector<float,3>( 0.0f, -20.0f, 20.0f ) );
     _camera->enableCulling(false); //
+    //_renderer->setClearColor(GMlib::GMcolor::Black);
     _scene->insertCamera( _camera.get() );
     _renderer->reshape( GMlib::Vector<int,2>(init_viewport_size, init_viewport_size) );
 
@@ -252,7 +253,82 @@ Scenario::isSimulationRunning()
 }
 
 void
-Scenario::replotTesttorus() { _testtorus->replot(4, 4, 1, 1); }
+Scenario::replotLow()
+{
+    const GMlib::Array<GMlib::SceneObject*> &selected_objects = _scene->getSelectedObjects();
+
+    for( int i = 0; i < selected_objects.getSize(); i++ )
+    {
+        GMlib::SceneObject* obj = selected_objects(i);
+        std::string str = obj->getIdentity();
+        //const char * c = str.c_str();
+
+        if (str == "PTorus")
+        {
+            //qDebug() << c;
+            GMlib::PTorus<float> *objtorus = dynamic_cast<GMlib::PTorus<float>*>(obj);
+            objtorus->replot(4, 4, 1, 1);
+        }
+        else if (str == "PSphere")
+        {
+            //qDebug() << c;
+            GMlib::PSphere<float> *objsphere = dynamic_cast<GMlib::PSphere<float>*>(obj);
+            objsphere->replot(7, 7, 1, 1);
+        }
+        else if (str == "PPlane")
+        {
+            //qDebug() << c;
+            GMlib::PPlane<float> *objplane = dynamic_cast<GMlib::PPlane<float>*>(obj);
+            objplane->replot(1, 1, 1, 1);
+        }
+        else if (str == "PCylinder")
+        {
+            //qDebug() << c;
+            GMlib::PCylinder<float> *objcylinder = dynamic_cast<GMlib::PCylinder<float>*>(obj);
+            objcylinder->replot(4, 4, 1, 1);
+        }
+    }
+
+}
+
+void
+Scenario::replotHigh()
+{
+    const GMlib::Array<GMlib::SceneObject*> &selected_objects = _scene->getSelectedObjects();
+
+    for( int i = 0; i < selected_objects.getSize(); i++ )
+    {
+        GMlib::SceneObject* obj = selected_objects(i);
+        std::string str = obj->getIdentity();
+        //const char * c = str.c_str();
+
+        if (str == "PTorus")
+        {
+            //qDebug() << c;
+            GMlib::PTorus<float> *objtorus = dynamic_cast<GMlib::PTorus<float>*>(obj);
+            objtorus->replot(200, 200, 1, 1);
+        }
+        else if (str == "PSphere")
+        {
+            //qDebug() << c;
+            GMlib::PSphere<float> *objsphere = dynamic_cast<GMlib::PSphere<float>*>(obj);
+            objsphere->replot(200, 200, 1, 1);
+        }
+        else if (str == "PPlane")
+        {
+            //qDebug() << c;
+            GMlib::PPlane<float> *objplane = dynamic_cast<GMlib::PPlane<float>*>(obj);
+            objplane->replot(10, 10, 1, 1);
+        }
+        else if (str == "PCylinder")
+        {
+            //qDebug() << c;
+            GMlib::PCylinder<float> *objcylinder = dynamic_cast<GMlib::PCylinder<float>*>(obj);
+            objcylinder->replot(200, 200, 1, 1);
+        }
+    }
+
+}
 
 float Scenario::getScale()
 {

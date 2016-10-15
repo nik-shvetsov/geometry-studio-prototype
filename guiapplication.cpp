@@ -114,22 +114,22 @@ void GuiApplication::onSceneGraphInvalidated() {
 
 void GuiApplication::handleKeyPress( QKeyEvent* e ) {
 
-    if(e->key() == Qt::Key_Q)
+    if(e->key() == Qt::Key_Q && e->modifiers() == Qt::ControlModifier)
     {
         _window.close();
     }
 
-    else if(e->key() == Qt::Key_S)
-    {
-        _scenario.save();
-        //qDebug() << "File saved";
-    }
+//    else if(e->key() == Qt::Key_S)
+//    {
+//        _scenario.save();
+//        //qDebug() << "File saved";
+//    }
 
-    else if(e->key() == Qt::Key_L)
-    {
-        _scenario.load();
-        //qDebug() << "File loaded";
-    }
+//    else if(e->key() == Qt::Key_L)
+//    {
+//        _scenario.load();
+//        //qDebug() << "File loaded";
+//    }
 
     //cam fly controls
 
@@ -240,8 +240,14 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
 
     if(ke and ke->key() == Qt::Key_P)
     {
-        qDebug() << "Handling the P button - replot Torus";
-        _scenario.replotTesttorus();
+        qDebug() << "Handling the P button - replot low";
+        _scenario.replotLow();
+    }
+
+    if(ke and ke->key() == Qt::Key_O)
+    {
+        qDebug() << "Handling the O button - replot high";
+        _scenario.replotHigh();
     }
 
     if(ke and ke->key() == Qt::Key_A)
@@ -282,26 +288,26 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
         _scenario.toggleSimulation();
     }
 
-    if ( (me and me->buttons() == Qt::RightButton) && !_controlPressed)
+    if ( (me and me->buttons() == Qt::RightButton) && me->modifiers() == Qt::NoModifier)
     {
         qDebug() << "Handling RMB - select object";
         _scenario.selectObject(_endpos);
     }
 
-    if ((me and me->buttons() == Qt::RightButton) && _controlPressed)
+    if ((me and me->buttons() == Qt::RightButton) && me->modifiers() == Qt::ShiftModifier)
     {
         qDebug() << "Handling RMB with control - multiple objects selection";
         _scenario.selectObjects(_endpos);
     }
 
-    if ((me and me->buttons() == Qt::RightButton) && me->modifiers() == Qt::AltModifier)
+    if ((me and me->buttons() == Qt::RightButton) && me->modifiers() == Qt::ControlModifier)
     {
         _scenario.lockToObject(_endpos);
     }
 
     if(me and me->buttons()==Qt::LeftButton)
     {
-        if(me->modifiers()==Qt::AltModifier)
+        if(me->modifiers()==Qt::ShiftModifier)
         {
             _scenario.moveObj(_startpos,_endpos);
         }
@@ -312,7 +318,7 @@ void GuiApplication::handleGLInputEvents() { //for OpenGL methods
 
         if(me and me->type()==QEvent::MouseMove)
         {
-            if(me->modifiers()==Qt::AltModifier)
+            if(me->modifiers()==Qt::ShiftModifier)
             {
                 _scenario.moveObj(_startpos,_endpos);
             }
