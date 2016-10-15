@@ -108,7 +108,7 @@ public:
   void                                              scaleObj(int &delta);
   void                                              changeColor();
   void                                              resetCam(); // unlock camera, return camera position to default
-  void                                              insertObject();
+  void                                              insertObject(char type, const QPoint& pos);
   void                                              insertSphere(float radius, const QPoint& pos);
   void                                              deleteObject();
 

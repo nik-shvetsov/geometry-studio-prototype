@@ -96,6 +96,7 @@ GuiApplication::onSceneGraphInitialized() {
   _scenario.initializeScenario();
   _scenario.prepare();
 
+
   emit signOnSceneGraphInitializedDone();
 }
 

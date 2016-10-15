@@ -19,6 +19,7 @@
 #include <cassert>
 #include <iostream>
 #include <iomanip>
+#include <math.h>
 
 
 using namespace std;
@@ -185,7 +186,14 @@ Scenario::initializeScenario() {
   auto testplane = new GMlib::PPlane<float> (GMlib::Point<float,3>(-5,0,0), GMlib::Vector<float,3>(10,0,0), GMlib::Vector<float,3>(0,20,0));
   testplane->toggleDefaultVisualizer();
   testplane->replot(50,50,1,1);
+  testplane->setMaterial(GMlib::GMmaterial::PolishedGreen);
   _scene->insert(testplane);
+
+  auto testfig = new GMlib::PSphere<float>(1);
+  testfig->toggleDefaultVisualizer();
+  testfig->replot(200,200,1,1);
+  testfig->translateGlobal(GMlib::Vector<float,3>(8,0,0));
+  _scene->insert(testfig);
 }
 
 std::unique_ptr<Scenario> Scenario::_instance {nullptr};
@@ -359,10 +367,10 @@ void Scenario::resetCam()
 
 }
 
-void Scenario::moveCamera(const QPoint& begin_pos, const QPoint& end_pos)
+void Scenario::moveCamera(const QPoint& c_pos, const QPoint& p_pos)
 {
-    auto pos = fromQtToGMlibViewPoint(begin_pos);
-    auto prev = fromQtToGMlibViewPoint(end_pos);
+    auto pos = fromQtToGMlibViewPoint(c_pos);
+    auto prev = fromQtToGMlibViewPoint(p_pos);
 
     const float scale = getScale();
     auto deltaX = (pos(0) - prev(0)) * scale / _camera->getViewportW();
@@ -370,7 +378,6 @@ void Scenario::moveCamera(const QPoint& begin_pos, const QPoint& end_pos)
 
     GMlib::Vector<float,2> delta (deltaX,deltaY);
     _camera->move( delta );
-
 }
 
 void Scenario::zoomCamera(const float &zoom_val)
@@ -580,24 +587,31 @@ void Scenario::rotateObj(const QPoint& begin_pos, const QPoint& end_pos)
 {
     auto rot_pos = fromQtToGMlibViewPoint(begin_pos);
     auto rot_prev = fromQtToGMlibViewPoint(end_pos);
+    double error = 1e-6;
+
+    if( std::abs(rot_pos(0)-rot_prev(0)) > error || std::abs(rot_pos(1)-rot_prev(1)) > error)
+    {
 
     auto difX = float(rot_pos(0) - rot_prev(0));
     auto difY = float(rot_pos(1) - rot_prev(1));
 
+    //const GMlib::UnitVector<float,3> rotV = float( rot_pos(0) - rot_prev(0) ) * _camera->getGlobalUp() - float( rot_pos(0) - rot_prev(0) ) * _camera->getGlobalSide();
     GMlib::Vector<float,3> rotDir (difX,difY,0);
-
-    rotDir = rotDir * 0.001;
+    //rotDir = rotDir * 0.001;
 
     GMlib::Angle angle(M_2PI * sqrt(
-                  pow( double( difX) / _camera->getViewportW(), 2 ) +
-                  pow( double( difY) / _camera->getViewportH(), 2 ))
-            );
+                           pow( double( difX) / _camera->getViewportW(), 2 ) +
+                           pow( double( difY) / _camera->getViewportH(), 2 ))
+                       );
     const GMlib::Array<GMlib::SceneObject*> &selected_objects = _scene->getSelectedObjects();
     for( int i = 0; i < selected_objects.getSize(); i++ )
     {
         GMlib::SceneObject* obj = selected_objects(i);
         obj->rotateGlobal(angle,rotDir);
     }
+
+    }
+
 }
 
 void Scenario::scaleObj(int &delta)
@@ -607,10 +621,12 @@ void Scenario::scaleObj(int &delta)
     const float plus_val = 1.01;
     const float minus_val = 0.99;
 
+
+
     for( int i = 0; i < selected_objects.getSize(); i++ )
     {
         GMlib::SceneObject* obj = selected_objects(i);
-
+        //double dh = _camera->deltaTranslate(obj);
         if(delta>0)
         {
             obj->scale( plus_val );
@@ -696,6 +712,35 @@ void Scenario::insertSphere(float radius, const QPoint& pos)
     //sphere->translate(GMlib::Point<float,3>(newPoint(0),newPoint(1),0), true);
 
     _scene->insert(sphere);
+}
+
+void Scenario::insertObject(char type, const QPoint& pos)
+{
+    auto gmPos = fromQtToGMlibViewPoint(pos);
+    const float scale = getScale();
+    int diff = 12;
+    GMlib::Point<float,2> newPoint ( (gmPos(0))*scale / _camera->getViewportW() - diff,
+                                    (gmPos(1))*scale / _camera->getViewportH() - diff);
+
+    if (type == 'S') //sphere
+    {
+        auto object = new GMlib::PSphere<float>(1.0);
+        object->toggleDefaultVisualizer();
+        object->replot(200,200,1,1);
+        object->setMaterial(GMlib::GMmaterial::Gold);
+        object->set(newPoint, GMlib::Vector<float,3>(0,1,0), GMlib::Vector<float,3>(0,0,1));
+        _scene->insert(object);
+
+    }
+    else if (type == 'C') //cylinder
+    {
+        auto object = new GMlib::PCylinder<float>();
+        object->toggleDefaultVisualizer();
+        object->replot(200,200,1,1);
+        object->setMaterial(GMlib::GMmaterial::Gold);
+        object->set(newPoint, GMlib::Vector<float,3>(0,1,0), GMlib::Vector<float,3>(0,0,1));
+        _scene->insert(object);
+    }
 }
 
 void Scenario::deleteObject()

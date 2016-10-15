@@ -16,8 +16,6 @@ Window::Window(QWindow *parent) : QQuickView(parent) {
   setResizeMode(SizeRootObjectToView);
   setMinimumSize( QSize( 800, 600 ) );
 
-
-
   QSurfaceFormat format;
   if(QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGL) {
 
