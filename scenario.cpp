@@ -189,11 +189,13 @@ Scenario::initializeScenario() {
   testplane->setMaterial(GMlib::GMmaterial::PolishedGreen);
   _scene->insert(testplane);
 
-  auto testfig = new GMlib::PSphere<float>(1);
-  testfig->toggleDefaultVisualizer();
-  testfig->replot(200,200,1,1);
-  testfig->translateGlobal(GMlib::Vector<float,3>(8,0,0));
-  _scene->insert(testfig);
+  auto testsphere = new GMlib::PSphere<float>(1);
+  testsphere->toggleDefaultVisualizer();
+  testsphere->replot(200,200,1,1);
+  testsphere->translateGlobal(GMlib::Vector<float,3>(8,0,0));
+  testsphere->setMaterial(GMlib::GMmaterial::Gold);
+  _scene->insert(testsphere);
+
 }
 
 std::unique_ptr<Scenario> Scenario::_instance {nullptr};
